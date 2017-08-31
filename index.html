@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<meta charset=UTF-8>
+<title>Standard Horizon HX870E</title>
+<style>
+body { line-height: 130%; margin: 2em; }
+#github { position: absolute; top: 0; right: 0; border: none; }
+#githubspace { margin-right: 70px; }
+code { color: #800; }
+table { border-collapse: collapse; }
+table tr td, table tr th, span.example { border: 1px solid #aaa; }
+table.eeprom tr td:first-child { font-family: monospace; }
+table tr th {background-color: #fdd;}
+table.eeprom code {white-space: pre;}
+hr, h2 { margin-top: 2em; }
+h1+h2 { margin-top: 0; }
+pre { font-size: .8em; line-height: 120%; }
+td, span.example { padding: .2ex .2em; }
+p.x { background-color: #ffd; padding: .4ex .4em; border: 1px solid #cc6; }
+tr.x td, .x.example { background-color: #ffd; } /* unknown */
+tr.c td, .c.example { background-color: #dfd; } /* probable constant value or padding */
+</style>
+
+<h1>Standard Horizon HX870E</h1>
+
+<p id=githubspace>The <a href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;DivisionID=3&amp;ProdCatID=85&amp;ProdID=1791">HX870E</a> is the successor to the Standard Horizon HX851E marine VHF radio. This page was inspired by a <a href=http://www.paul.sladen.org/toys/vertex/hx851e.html>collection of information about the HX851E</a> by someone else. I created this page for my own use, then decided it might also be of use to others.
+
+<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was solely gathered by playing around some with my HX870E (firmware version 2.03) and YCE15 software version 2.0.0.4. It may not apply to a plain HX870 or even another HX870E.
+
+<p><strong>Disclaimer:</strong> Modifying the memory image directly using a hex editor is likely not a supported function of the device or its accompanying software. As such, it might <strong>void your warranty</strong> or <strong>brick the radio</strong> or even put it into a state where it transmits or receives on frequencies forbidden by international <a href=https://www.itu.int/pub/R-REG-RR/e>Radio Regulations</a>, local regulations (<a href=https://www.fcc.gov/wireless/bureau-divisions/mobility-division/maritime-mobile-service>FCC</a> / <a href=https://www.bundesnetzagentur.de/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/SpezielleAnwendungen/Seefunk/Seefunk-node.html>BNetzA</a> / …) or local law. Using the radio in such a state might disrupt vital safety-of-life services. Many jurisdictions impose a <strong>fine or criminal penalty</strong> on it. You should not mess around with any of this stuff unless you know what you’re doing! And, to finally state the obvious: Whatever <em>you</em> do, <em>I</em> cannot be held responsible for it.
+
+<h2 id=memory>Memory image</h2>
+
+<p>32kB EEPROM, stored by Standard Horizon’s YCE15 software as a *.dat file
+
+<p>The significance of memory locations marked with a <span class="x example>yellow background</span> has not been discovered.
+<br>Memory locations marked with a <span class="c example>green background</span> appear to have constant values (padding etc.) and can <em>probably</em> safely be ignored.
+
+<p>Characters are coded as fixed-length ASCII strings (permissible chars include: <code>A-Za-z0-9 &amp;'*,-.:/[]</code>) with 0xff padding, but apparently many strings cannot be used to their full length due to UI limitations.
+
+<p>DSC addresses presently consist of the nine-digit MMSI and a tenth digit, reserved for future use. They are coded with the full ten digits. The last digit is always zero as per <a href=https://www.itu.int/rec/R-REC-M.1080>Rec. ITU-R M.1080</a>.
+
+<table class=eeprom>
+<tr>        <th>Address       <th>Data <th>Format
+<tr class=c><td>0x0000–0x0001 <td>model number? <td>0x0367 = 871
+<tr class=x><td>0x0002–0x0007 <td>DW inactive, WX inactive, …? <td>0c010000000000
+<tr>        <td>0x0008        <td>selected channel group <td>
+<tr class=x><td>0x0009–0x000b <td> <td>0x0e0202
+<tr>        <td>0x000c        <td>volume setting <td>numeric (16 steps)
+<tr>        <td>0x000d        <td>squelch setting <td>numeric (16 steps)
+<tr class=x><td>0x000e        <td>distress alert status? <td>0x00
+<tr class=x><td>0x000f        <td> <td>0x00
+<tr>        <td>0x0010–0x0013 <td>selected channel <td>0x00 + channel (twice)
+<tr class=x><td>0x0014–0x0015 <td> <td>0xf001
+<tr class=c><td>0x0016–0x001f <td> <td>0xff…
+<tr>        <td>0x0020–0x006f <td>device setup <td><a href=#setup1>Setup 1</a>
+<tr>        <td>0x0070–0x00af <td>channel group names <td>4 * <a href=#channel-group-def>Channel Group Definition</a>
+<tr class=x><td>0x00b0–0x00ff <td>DSC setup? <td><a href=#setup2>Setup 2</a>
+<tr class=c><td>0x0100–0x0107 <td>codename / product string? <td><code>AM057N2</code>
+<tr class=c><td>0x0108–0x010e <td> <td>0xff…
+<tr>        <td>0x010f        <td>region selection (group 3 mode) <td>0x00=CAN, 0x01=UK, 0x02=BE, 0x03=NL, 0x04=SW, 0x05=GRMN
+<tr class=c><td>0x0110–0x011f <td> <td>0xff…
+<tr>        <td>0x0120–0x012b <td>channel enabled group 1 <td>bitmask
+<tr class=x><td>0x012c–0x013f <td> <td>0x00… 0xff…
+<tr>        <td>0x0140–0x014b <td>channel enabled group 2 <td>bitmask
+<tr class=x><td>0x014c–0x015f <td> <td>0x00… 0xff…
+<tr>        <td>0x0160–0x016b <td>channel enabled group 3 <td>bitmask
+<tr class=x><td>0x016c–0x017f <td> <td>0x00… 0xff…
+<tr>        <td>0x0180–0x0181 <td>channel enabled group WX <td>bitmask
+<tr>        <td>0x0182–0x0183 <td>channel enabled group RG <td>bitmask
+<tr>        <td>0x0184–0x0186 <td>channel enabled group EXP <td>bitmask
+<tr class=x><td>0x0187–0x018f <td> <td>0x00… 0xff…
+<tr>        <td>0x0190–0x019b <td>scan mem group 1 <td>bitmask
+<tr class=x><td>0x019c–0x01af <td> <td>0x00… 0xff…
+<tr>        <td>0x01b0–0x01bb <td>scan mem group 2 <td>bitmask
+<tr class=x><td>0x01bc–0x01cf <td> <td>0x00… 0xff…
+<tr>        <td>0x01d0–0x01db <td>scan mem group 3 <td>bitmask
+<tr class=x><td>0x01dc–0x01ef <td> <td>0x00… 0xff…
+<tr>        <td>0x01f0–0x01f1 <td>scan mem group WX <td>bitmask
+<tr>        <td>0x01f2–0x01f3 <td>scan mem group RG <td>bitmask
+<tr>        <td>0x01f4–0x01f6 <td>scan mem group EXP <td>bitmask
+<tr class=x><td>0x01f7–0x01ff <td> <td>0x00… 0xff…
+<tr>        <td>0x0200–0x0213 <td>preset list group 1 <td>10 * <a href=#preset>Preset</a>
+<tr class=c><td>0x0214–0x021f <td> <td>12 * 0xff
+<tr>        <td>0x0220–0x023f <td>preset list group 2 <td>10 * <a href=#preset>Preset</a>
+<tr class=c><td>0x0234–0x023f <td> <td>12 * 0xff
+<tr>        <td>0x0240–0x025f <td>preset list group 3 <td>10 * <a href=#preset>Preset</a>
+<tr class=c><td>0x0254–0x025f <td> <td>12 * 0xff
+<tr class=x><td>0x0260–0x027f <td>preset list for EXP/RG/WX? <td>0xff…
+<tr class=x><td>0x0280–0x02cf <td> <td>
+<tr class=x><td>0x02d0–0x02db <td>activation per channel group for RG <td>only 3 least significant bits, one RG channel per byte
+<tr class=c><td>0x02dc–0x02df <td> <td>0xff…
+<tr class=x><td>0x02e0–0x02f3 <td>activation per channel group for EXP <td>only 3 least significant bits, one EXP channel per byte
+<tr class=c><td>0x02f4–0x02ff <td> <td>0xff…
+<tr class=x><td>0x0300–0x05ff <td> <td>0xff…
+<tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Channel Flags</a>
+<tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Channel Flags</a>
+<tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Channel Flags</a>
+<tr class=c><td>0x0a80–0x0a9f <td> <td>0xff…
+<tr>        <td>0x0aa0–0x0adf <td>regional channels <td>12 * <a href=#channel-definition>Channel Definition</a>
+<tr>        <td>0x0b00–0x0b57 <td>expansion channels <td>20 * <a href=#channel-definition>Channel Definition</a>
+<tr>        <td>0x0ba0–0x0eff <td>channel names group 1 <td>96 * 16 * char
+<tr class=c><td>0x11a0–0x179f <td> <td>96 * 16 * 0xff
+<tr>        <td>0x17a0–0x1d9f <td>channel names group 2 <td>96 * 16 * char
+<tr class=c><td>0x1da0–0x239f <td> <td>96 * 16 * 0xff
+<tr>        <td>0x23a0–0x299f <td>channel names group 3 <td>96 * 16 * char
+<tr class=c><td>0x29a0–0x2f9f <td> <td>96 * 16 * 0xff
+<tr>        <td>0x2fa0–0x305f <td>channel names group RG <td>12 * 16 * char
+<tr class=c><td>0x3060–0x311f <td> <td>12 * 16 * 0xff
+<tr>        <td>0x3120–0x325f <td>channel names group EXP <td>20 * 16 * char
+<tr class=c><td>0x3260–0x311f <td> <td>20 * 16 * 0xff
+<tr class=c><td>0x33a0–0x33bf <td> <td>0xff…
+<tr>        <td>0x33c0–0x345f <td>channel names group WX <td>10 * 16 * char
+<tr class=c><td>0x3460–0x34ff <td> <td>10 * 16 * 0xff
+<tr>        <td>0x3500–0x3714 <td>DSC individual directory: addresses <td>100 * 10 nibbles BCD (last nibble zero) <br>after every third address, a single 0xff byte is inserted
+<tr class=c><td>0x3715–0x372f <td> <td>0xff…
+<tr>        <td>0x3730–0x3d6f <td>DSC individual directory: names <td>100 * 16 * char
+<tr class=c><td>0x3d70–0x3dff <td> <td>0xff…
+<tr class=x><td>0x3e00–0x3e6a <td>DSC group directory: addresses <td>20 * 10 nibbles BCD (last nibble zero) <br>after every third address, a single 0xff byte probably is inserted
+<tr class=c><td>0x3e6b–0x3e7f <td> <td>0xff…
+<tr>        <td>0x3e80–0x3fbf <td>DSC group directory: names <td>20 * 16 * char
+<tr class=c><td>0x3fc0–0x3fff <td> <td>0xff…
+<tr class=x><td>0x4000–0x42ff <td>group monitor <td>?
+<tr class=x><td>0x4300–0x5bff <td>waypoints <td>200 wpts, each with 16 byte BCD pos. + 16 byte name
+<tr>        <td>0x5c00–0x5e7f <td>routes <td>20 routes, each with 16 byte name + 15 wpts + 0xff
+<tr class=x><td>0x5e80–0x7ffd <td> <td>0xff…
+<tr class=c><td>0x7ffe–0x7fff <td>model number? <td>0x0367 = 871
+</table>
+
+<p>There is a bug in the YCE15 software version 2.0.0.4 that can cause corruption of the DSC individual directory (likely also other directories) when opening a memory image file containing directory entries that are not alphabetically sorted. However, the bug is only triggered when the “Individual Directory” item is chosen in YCE15. If instead the memory image is directly programmed into the device without first viewing the directory in YCE15, the result is just fine.
+
+<p class=x>The “activation per channel group” for RG and EXP doesn’t seem to work as I think it should. This ought to be solvable, as the region modes UK and SW contain RG channels that use these activation bits.
+
+<h3 id=setup1>Setup 1</h3>
+<table class=eeprom>
+<tr>        <th>Address       <th>Data <th>Format
+<tr>        <td>0x0020–0x0025 <td>priority channels <td>3 * numeric (2 bytes; 0xffff=none)
+<tr>        <td>0x0026–0x002b <td>sub channels <td>3 * numeric (2 bytes; 0xffff=none)
+<tr class=x><td>0x002c–0x002f <td> <td>0xffffff02
+<tr>        <td>0x0030        <td>dimmer <td>
+<tr>        <td>0x0031        <td>contrast <td>numeric
+<tr>        <td>0x0032        <td>key beep <td>
+<tr class=x><td>0x0033        <td> <td>0x01
+<tr>        <td>0x0034        <td>multi watch <td>0x00=dual, 0x01=triple
+<tr class=x><td>0x0035        <td> <td>0x01
+<tr>        <td>0x0036        <td>scan type <td>0x00=memory, 0x01=priority
+<tr>        <td>0x0037        <td>scan resume time <td>
+<tr>        <td>0x0038        <td>weather alert <td>
+<tr class=x><td>0x0039        <td> <td>0x00
+<tr>        <td>0x003a        <td>emergency LED <td>0x00=continuous, 0x01=SOS, …
+<tr>        <td>0x003b        <td>water hazard LED <td>0x00=off, 0x01=on, 0x02=power-on
+<tr>        <td>0x003c        <td>lamp <td>
+<tr>        <td>0x003d        <td>AF pitch CONT <td>0x00=normal, 0x01=high-low-cut, …
+<tr>        <td>0x003e        <td>battery save <td>0x00=off, 0x01=50%, 0x02=70%, 0x03=80%, 0x04=90%
+<tr class=c><td>0x003f        <td> <td>0xff
+<tr>        <td>0x0040        <td>VOX <td>0x00=off, 0x01=on
+<tr>        <td>0x0041        <td>VOX level <td>
+<tr>        <td>0x0042        <td>VOX delay time <td>
+<tr>        <td>0x0043        <td>noise cancel Rx <td>
+<tr>        <td>0x0045        <td>noise cancel Tx <td>0x00=off, 0x01=on
+<tr class=x><td>0x0046-0x049  <td> <td>0x00ffffff
+<tr>        <td>0x004a        <td>nav display range <td>
+<tr class=x><td>0x004b        <td> <td>0xff
+<tr>        <td>0x004c        <td>nav arrival range <td>
+<tr>        <td>0x004d        <td>nav routing operation <td>
+<tr class=c><td>0x004e-0x04f  <td> <td>
+<tr>        <td>0x0050        <td>GPS enabled <td>0x00=no, 0x01=yes
+<tr class=x><td>0x0051-0x05b  <td>GPS setup <td>?
+<tr class=x><td>0x005c        <td> <td>0x00
+<tr class=c><td>0x005d-0x060  <td> <td>0xffffff
+<tr>        <td>0x0061        <td>soft key timer <td>0x01=3s, 0x02=5s, 0x03=7s, 0x04=10s, 0x05=15s
+<tr>        <td>0x0062–0x006d <td>soft keys <td>4 groups of 3 keys; 0x00=none
+<tr class=c><td>0x006e–0x006f <td> <td>0xffff
+</table>
+
+<h3 id=setup2>Setup 2</h3>
+<table class=eeprom>
+<tr>        <th>Address       <th>Data <th>Format
+<tr>        <td>0x00b0–0x00b4 <td>DSC address (MMSI) <td>10 nibbles BCD (last nibble zero)
+<tr class=x><td>0x00b5        <td> <td>0x02
+<tr>        <td>0x00b6–0x00ba <td>ATIS code <td>10 nibbles BCD
+<tr class=x><td>0x00bb        <td> <td>0x01
+<tr class=x><td>0x00bc–0x00c3 <td> <td>
+<tr class=x><td>0x00c4-0x00ca <td>DSC setup <td>?
+<tr class=x><td>0x00cb–0x00cf <td> <td>
+<tr class=x><td>0x00d0–0x00df <td> <td>0xff…
+<tr class=x><td>0x00e0        <td> <td>0x00
+<tr class=x><td>0x00e1-0x00e2 <td>DSC setup (Auto POS) <td>?
+<tr class=x><td>0x00e3–0x00f1 <td> <td>
+<tr>        <td>0x00f2        <td>GM interval <td>
+<tr class=x><td>0x00f3–0x00ff <td> <td>
+</table>
+
+<h3 id=channel-group-def>Channel Group Definition</h3>
+<table class=eeprom>
+<tr>        <th>Offset  <th>Data <th>Format
+<tr>        <td>0x0     <td>channel group enabled <td>0x00 = no, 0x01 = yes
+<tr class=x><td>0x1     <td>ATIS squelch? DSC enabled? Scan enabled? <td>0x01
+<tr>        <td>0x2     <td>ATIS enabled <td>0x00 = no, 0x01 = yes
+<tr>        <td>0x3–0x6 <td>channel group name <td>0–4 chars, 0xff padded
+<tr class=c><td>0x7     <td> <td>0xff
+<tr>        <td>0x8–0xf <td>model string? <td>5–6 chars, 0xff padded
+</table>
+
+<p class=x>Does the “enable ATIS” flag do anything for the EXP group?
+
+<h3 id=preset>Preset</h3>
+<table class=eeprom>
+<tr>        <th>Offset    <th>Data <th>Format
+<tr>        <td>0x0     <td>preset in use <td>0x00=in use, 0xff=not in use
+<tr>        <td>0x1     <td>channel reference <td>1-based index in the channel list <br>(with RG and EXP immediately after the group's channels)
+</table>
+
+<p>There is some sort of bug in the YCE15 software version 2.0.0.4 that can result in unusable Presets. For example, when setting an EXP channel as a preset (possibly also when simply setting a preset to “none”), byte values in the range of 0x81–0xff are set. This results in channels like “00” or “43” in the radio that give off funny noises when they’re selected.
+
+<h3 id=channel-flags>Channel Flags</h3>
+<table class=eeprom>
+<tr>        <th>Offset  <th>Data <th>Format
+<tr>        <td>0x0     <td>channel ID <td>numeric
+<tr>        <td>0x1-0x2 <td>flags <td>bitmask; see below
+<tr class=c><td>0x3     <td>padding/reserved? <td>0xff
+</table>
+<pre>
+0x8000 = 1xxxxxxx xxxxxxxx = frq shift Rx only
+0x4000 = x1xxxxxx xxxxxxxx = frq shift Rx and Tx
+0x2000 = xx1xxxxx xxxxxxxx = high power allowed
+0x1000 = xxx1xxxx xxxxxxxx = Tx allowed
+0x0800 = xxxx1xxx xxxxxxxx = high power allowed, but low power is default
+0x0400 = xxxxx1xx xxxxxxxx - unused?
+0x0200 = xxxxxx1x xxxxxxxx = channel suffix: "B"
+0x0100 = xxxxxxx1 xxxxxxxx = channel suffix: "A"
+0x0080 = xxxxxxxx 1xxxxxxx = DSC ship/ship channel
+0x007f = xxxxxxxx x1111111 = channel prefix: 0x7f=none, other=numeric
+
+Frequent combinations:
+0x30ff = 00110000 11111111 = ship/ship channel
+0x10ff = 00010000 11111111 = ship/ship channel, limited to 1W
+0x18ff = 00011000 11111111 = ship/ship channel, defaults to 1W
+0x307f = 00110000 01111111 = simplex channel
+0x107f = 00010000 01111111 = simplex channel, limited to 1W
+0x300a = 00110000 00001010 = simplex "10" channel
+0x7014 = 01110000 00010100 = simplex "20" channel
+0x317f = 00110001 01111111 = USA "A" channel
+0x827f = 10000010 01111111 = CAN "B" channel
+0xb07f = 10110000 01111111 = duplex channel
+0x907f = 10010000 01111111 = duplex channel, limited to 1W
+0x007f = 00000000 01111111 = Tx forbidden
+
+Some other useful combinations:
+0x987f = 10011000 01111111 = duplex channel, defaults to 1W<!--  (30)-->
+0x197f = 00011001 01111111 = simplex "A" channel, defaults to 1W<!--  (37A)-->
+0x5a7f = 01011010 01111111 = simplex "B" channel, defaults to 1W<!--  (96B)-->
+0x180a = 00011000 00001010 = simplex "10" channel, defaults to 1W<!--  (VDES)-->
+0x5814 = 01011000 00010100 = simplex "20" channel, defaults to 1W<!--  (VDES)-->
+0x4014 = 01000000 00010100 = simplex "20" channel, Tx forbidden<!--  (2006, ASM)-->
+</pre>
+
+<!--
+USA:
+0x30ff = 00110000 11111111 : 06,08-10,69,72 .............. simplex
+0x10ff = 00010000 11111111 : 17,77 ....................... simplex, max. 1W
+0x18ff = 00011000 11111111 : 13,67 ....................... simplex, def. 1W
+0x307f = 00110000 01111111 : 11,12,14,16,68,71,73,74,87A . simplex
+0x107f = 00010000 01111111 : 75,76 ....................... simplex, max. 1W
+0x317f = 00110001 01111111 : 01A,03A,05A,07A,18A-23A,61A,63A-66A,78A-83A,88A .. simplex
+0xb07f = 10110000 01111111 : 20,24-28,84-86 .............. duplex, Rx frq shift
+0x007f = 00000000 01111111 : 15,70 ....................... Tx forbidden
+
+INTL:
+0x30ff = 00110000 11111111 : 06,08-10,13,67,69,72,73,77 .. simplex
+0x10ff = 00010000 11111111 : 15,17 ....................... simplex, max. 1W
+0x307f = 00110000 01111111 : 11,12,14,16,68,71,74,87,88 .. simplex
+0x107f = 00010000 01111111 : 75,76 ....................... simplex, max. 1W
+0x300a = 00110000 00001010 : 1019,1020,1078,1079 ......... simplex
+0x7014 = 01110000 00010100 : 2019,2020,2078,2079 ......... simplex, Rx+Tx frq shift
+0xb07f = 10110000 01111111 : 01-05,07,18-28,60-66,78-86 .. duplex, Rx frq shift
+0x007f = 00000000 01111111 : 70 .......................... Tx forbidden
+
+GRMN:
+0x30ff = 00110000 11111111 : 09,67,69,73 ................. simplex
+0x10ff = 00010000 11111111 : 06,08,10,13,17,72,77 ........ simplex, max. 1W
+0x307f = 00110000 01111111 : 16,68,87,88 ................. simplex
+0x107f = 00010000 01111111 : 11,12,14,15,71,74,75,76 ..... simplex, max. 1W
+0x300a = 00110000 00001010 : 1019,1020,1078,1079 ......... simplex
+0x7014 = 01110000 00010100 : 2019,2020,2078,2079 ......... simplex, Rx+Tx frq shift
+0xb07f = 10110000 01111111 : 01-05,07,18,19,21-28,60-66,78-86 .. duplex, Rx frq shift
+0x907f = 10010000 01111111 : 20 .......................... duplex, Rx frq shift, max. 1W
+0x007f = 00000000 01111111 : 70 .......................... Tx forbidden
+
+CAN:
+0x827f = 10000010 01111111 : "B" channels ................ Tx forbidden, Rx frq shift
+-->
+
+<p>Firmware 2.03 appears to have a bug in the “GRMN” (RAINWAT) channel group: Channel 20 doesn't have the “high power allowed” bit set although high power <em>is</em> allowed. This is easily fixable by modifying memory location 0x0955 in the memory image from 0x90 to 0xb0. (Furthermore, channels 17 and 69 are not intership channels according to RAINWAT rules, but arguably 87 is.)
+
+<p>Firmware 2.03 also appears to set the “suffix A” bit for channel 88, but not for 87 for the USA channel group. Given that both channels were redefined at the same time for the introduction of AIS, it’s clear that either both or none should have the “A”. According to the manual, both should have the suffix, but according to <a href=https://www.navcen.uscg.gov/?pageName=mtvhf>the Coast Guard</a>, neither should have it.
+
+<p>Firmware 2.03 appears to have an additional bug in the “INTL” channel group (possibly others as well): Channels 15 and 17 are no longer a guard band for channel 16 as per <a href=https://www.itu.int/pub/R-REG-RR/e>ITU RR</a> (App. 18) and <a href=https://www.itu.int/rec/R-REC-M.1084>Rec. M.1084</a>. Transmitting with full power is allowed on these channels unless they’re used for internal on-board communication. It would appear to make sense to at least code these as “low power default” if not “unrestricted power”.
+
+<h3 id=channel-definition>Channel Definition</h3>
+<table class=eeprom>
+<tr>        <th>Offset  <th>Data <th>Format
+<tr>        <td>0x0–0x1 <td>channel ID <td>2 * char (lower case not supported)
+<tr>        <td>0x2–0x4 <td>Rx frequency <td>5 nibbles BCD (in kHz above 100 MHz)
+<tr class=c><td>0x4     <td>padding? <td>lower nibble: 0x0
+<tr>        <td>0x5–0x7 <td>Tx frequency <td>5 nibbles BCD (in kHz above 100 MHz)
+<tr>        <td>0x7     <td>channel definition flags <td>lower nibble: bitmask; see below
+</table>
+<pre>
+0x08 = xxxx1xxx = low power
+0x04 = xxxxx1xx - ?
+0x02 = xxxxxx1x - ?
+0x01 = xxxxxxx1 = user power up?
+
+Frequent combinations:
+0x00 = xxxx0000 = standard
+0x08 = xxxx1000 = limited to 1W
+0x09 = xxxx1001 = defaults to 1W
+0x06 = xxxx0110 = ?
+
+Illegal combinations:
+0x0a = xxxx1010
+0x0b = xxxx1011
+0x0c = xxxx1100
+0x0d = xxxx1101
+0x0e = xxxx1110
+</pre>
+
+<hr>
+
+<a href="https://creativecommons.org/publicdomain/zero/1.0/" id=copyright><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAPCAAAAABWohdTAAAA4ElEQVR42q2TCxGDMBBEV0IkICESIgEJSEACDioBCZUQCUiIhEi4bi4cTGg7nWk4IOQzeSx7OeD2EJEITHzlmNmMcJv8HRU4FF4OHMxEBgRJrkfhikE5JWaSHaJMPUCPVWTjbz84JHqm4K0HqJQFSEVWLOyhTKojUq7a0edYwHUS%2BxhMiZcCdAn87aVupwOGs461OLdLve27BzCIpmJCbIAfFF6Btm6dViGtuyjEL4Vo2Pvy4SHSs%2FEQttuM%2B%2BLhG9Cy7KPf2Z1Zvv0cslLGs1Ky764UPdTUmLSWfW8t3xwvrOGH3yP4B6kAAAAASUVORK5CYII%3D" alt="Public Domain"></a>
+
+<a href="https://github.com/johannessen/hx870"><img id=github src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
