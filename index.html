@@ -92,12 +92,12 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x02e0–0x02f3 <td>activation per channel group for EXP <td>only 3 least significant bits, one EXP channel per byte
 <tr class=c><td>0x02f4–0x02ff <td> <td>0xff…
 <tr class=x><td>0x0300–0x05ff <td> <td>0xff…
-<tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Channel Flags</a>
-<tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Channel Flags</a>
-<tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Channel Flags</a>
+<tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
+<tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
+<tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr class=c><td>0x0a80–0x0a9f <td> <td>0xff…
-<tr>        <td>0x0aa0–0x0adf <td>regional channels <td>12 * <a href=#channel-definition>Channel Definition</a>
-<tr>        <td>0x0b00–0x0b57 <td>expansion channels <td>20 * <a href=#channel-definition>Channel Definition</a>
+<tr>        <td>0x0aa0–0x0adf <td>regional channels <td>12 * <a href=#channel-definition>Private Channel Definition</a>
+<tr>        <td>0x0b00–0x0b57 <td>expansion channels <td>20 * <a href=#channel-definition>Private Channel Definition</a>
 <tr>        <td>0x0ba0–0x0eff <td>channel names group 1 <td>96 * 16 * char
 <tr class=c><td>0x11a0–0x179f <td> <td>96 * 16 * 0xff
 <tr>        <td>0x17a0–0x1d9f <td>channel names group 2 <td>96 * 16 * char
@@ -212,7 +212,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 
 <p>There is some sort of bug in the YCE15 software version 2.0.0.4 that can result in unusable Presets. For example, when setting an EXP channel as a preset (possibly also when simply setting a preset to “none”), byte values in the range of 0x81–0xff are set. This results in channels like “00” or “43” in the radio that give off funny noises when they’re selected.
 
-<h3 id=channel-flags>Channel Flags</h3>
+<h3 id=channel-flags>Marine Channel Flags</h3>
 <table class=eeprom>
 <tr>        <th>Offset  <th>Data <th>Format
 <tr>        <td>0x0     <td>channel ID <td>numeric
@@ -296,7 +296,7 @@ CAN:
 
 <p>Firmware 2.03 appears to have an additional bug in the “INTL” channel group (possibly others as well): Channels 15 and 17 are no longer a guard band for channel 16 as per <a href=https://www.itu.int/pub/R-REG-RR/e>ITU RR</a> (App. 18) and <a href=https://www.itu.int/rec/R-REC-M.1084>Rec. M.1084</a>. Transmitting with full power is allowed on these channels unless they’re used for internal on-board communication. It would appear to make sense to at least code these as “low power default” if not “unrestricted power”.
 
-<h3 id=channel-definition>Channel Definition</h3>
+<h3 id=channel-definition>Private Channel Definition</h3>
 <table class=eeprom>
 <tr>        <th>Offset  <th>Data <th>Format
 <tr>        <td>0x0–0x1 <td>channel ID <td>2 * char (lower case not supported)
