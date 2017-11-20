@@ -25,7 +25,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 
 <p id=githubspace>The <a href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;DivisionID=3&amp;ProdCatID=85&amp;ProdID=1791">HX870E</a> is the successor to the Standard Horizon HX851E marine VHF radio. This page was inspired by a <a href=http://www.paul.sladen.org/toys/vertex/hx851e.html>collection of information about the HX851E</a> by someone else. I created this page for my own use, then decided it might also be of use to others.
 
-<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was solely gathered by playing around some with my HX870E (firmware version 2.03) and YCE15 software version 2.0.0.4. It may not apply to a plain HX870 or even another HX870E.
+<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was mostly gathered by playing around some with my HX870E (firmware version 2.03) and YCE15 software version 2.0.0.4, but includes a few things I learned from other users as well. It may not apply to a plain HX870 or even another HX870E.
 
 <p><strong>Disclaimer:</strong> Modifying the memory image directly using a hex editor is likely not a supported function of the device or its accompanying software. As such, it might <strong>void your warranty</strong> or <strong>brick the radio</strong> or even put it into a state where it transmits or receives on frequencies forbidden by international <a href=https://www.itu.int/pub/R-REG-RR/e>Radio Regulations</a>, local regulations (<a href=https://www.fcc.gov/wireless/bureau-divisions/mobility-division/maritime-mobile-service>FCC</a> / <a href=https://www.bundesnetzagentur.de/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/SpezielleAnwendungen/Seefunk/Seefunk-node.html>BNetzA</a> / …) or local law. Using the radio in such a state might disrupt vital safety-of-life services. Many jurisdictions impose a <strong>fine or criminal penalty</strong> on it. You should not mess around with any of this stuff unless you know what you’re doing! And, to finally state the obvious: Whatever <em>you</em> do, <em>I</em> cannot be held responsible for it.
 
@@ -51,7 +51,8 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x000e        <td>distress alert status? <td>0x00
 <tr class=x><td>0x000f        <td> <td>0x00
 <tr>        <td>0x0010–0x0013 <td>selected channel <td>0x00 + channel (twice)
-<tr class=x><td>0x0014–0x0015 <td> <td>0xf001
+<tr class=x><td>0x0014        <td> <td>0xf0
+<tr class=x><td>0x0015        <td> <td>[values seen: 0x01, 0x04]
 <tr class=c><td>0x0016–0x001f <td> <td>0xff…
 <tr>        <td>0x0020–0x006f <td>device setup <td><a href=#setup1>Setup 1</a>
 <tr>        <td>0x0070–0x00af <td>channel group names <td>4 * <a href=#channel-group-def>Channel Group Definition</a>
@@ -92,7 +93,8 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=c><td>0x02dc–0x02df <td> <td>0xff…
 <tr class=x><td>0x02e0–0x02f3 <td>activation per channel group for EXP <td>only 3 least significant bits, one EXP channel per byte
 <tr class=c><td>0x02f4–0x02ff <td> <td>0xff…
-<tr class=x><td>0x0300–0x05ff <td> <td>0xff…
+<tr class=x><td>0x0300–0x04ff <td> <td>
+<tr class=x><td>0x0500–0x05ff <td> <td>
 <tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
@@ -116,20 +118,30 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=c><td>0x3715–0x372f <td> <td>0xff…
 <tr>        <td>0x3730–0x3d6f <td>DSC individual directory: names <td>100 * 16 * char
 <tr class=c><td>0x3d70–0x3dff <td> <td>0xff…
-<tr class=x><td>0x3e00–0x3e6a <td>DSC group directory: addresses <td>20 * 10 nibbles BCD (last nibble zero) <br>after every third address, a single 0xff byte probably is inserted
+<tr>        <td>0x3e00–0x3e6a <td>DSC group directory: addresses <td>20 * 10 nibbles BCD (last nibble zero) <br>after every third address, a single 0xff byte is inserted
 <tr class=c><td>0x3e6b–0x3e7f <td> <td>0xff…
 <tr>        <td>0x3e80–0x3fbf <td>DSC group directory: names <td>20 * 16 * char
 <tr class=c><td>0x3fc0–0x3fff <td> <td>0xff…
-<tr class=x><td>0x4000–0x42ff <td>group monitor <td>?
+<tr>        <td>0x4000–0x427f <td>group monitor setup <td>10 * <a href=#gm-def>Group Monitor Definition</a>
+<tr class=c><td>0x4280–0x42ff <td> <td>0xff…
 <tr class=x><td>0x4300–0x5bff <td>waypoints <td>200 wpts, each with 16 byte BCD pos. + 16 byte name
 <tr>        <td>0x5c00–0x5e7f <td>routes <td>20 routes, each with 16 byte name + 15 wpts + 0xff
-<tr class=x><td>0x5e80–0x7ffd <td> <td>0xff…
+<tr class=c><td>0x5e80–0x5eff <td> <td>0xff…
+<tr class=x><td>0x5f00–0x60af <td>DSC log / history (transmitted calls) <td>?
+<tr class=x><td>0x60b0–0x64ff <td> <td>
+<tr class=x><td>0x6500–0x74ff <td>DSC log / history (received “other” calls) <td>?
+<!-- call format: basically first a BCD time stamp, followed by the DSC address and some flags and stuff, ending with the BCD position if available -->
+<tr class=x><td>0x7500–0x7ffd <td> <td>0xff…
 <tr class=c><td>0x7ffe–0x7fff <td>model number? <td>0x0367 = 871
 </table>
 
 <p>There is a bug in the YCE15 software version 2.0.0.4 that can cause corruption of the DSC individual directory (likely also other directories) when opening a memory image file containing directory entries that are not alphabetically sorted. However, the bug is only triggered when the “Individual Directory” item is chosen in YCE15. If instead the memory image is directly programmed into the device without first viewing the directory in YCE15, the result is just fine.
 
+<p class=x>The YCE15 software apparently manages to determine the radio model from the memory image. Non-E models don’t get the ATIS setup. How does that work?
+
 <p class=x>The “activation per channel group” for RG and EXP doesn’t seem to work as I think it should. This ought to be solvable, as the region modes UK and SW contain RG channels that use these activation bits.
+
+<p class=x>There is apparently some sort of bug affecting the call time and position time in the call log; the hours of the two times don’t match, but the minutes do. YCE15 says both times are supposed to be UTC. Is this an issue with calculating time zones or just a wrong label in YCE15?
 
 <h3 id=setup1>Setup 1</h3>
 <table class=eeprom>
@@ -137,8 +149,8 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr>        <td>0x0020–0x0025 <td>priority channels <td>3 * numeric (2 bytes; 0xffff=none)
 <tr>        <td>0x0026–0x002b <td>sub channels <td>3 * numeric (2 bytes; 0xffff=none)
 <tr class=x><td>0x002c–0x002f <td> <td>0xffffff02
-<tr>        <td>0x0030        <td>dimmer <td>
-<tr>        <td>0x0031        <td>contrast <td>numeric
+<tr>        <td>0x0030        <td>display backlight <td>numeric (0=off, 5=max)
+<tr>        <td>0x0031        <td>display contrast <td>numeric
 <tr>        <td>0x0032        <td>key beep <td>
 <tr class=x><td>0x0033        <td> <td>0x01
 <tr>        <td>0x0034        <td>multi watch <td>0x00=dual, 0x01=triple
@@ -163,11 +175,15 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x004b        <td> <td>0xff
 <tr>        <td>0x004c        <td>nav arrival range <td>
 <tr>        <td>0x004d        <td>nav routing operation <td>
-<tr class=c><td>0x004e-0x04f  <td> <td>
+<tr class=c><td>0x004e-0x04f  <td> <td>0xffff
 <tr>        <td>0x0050        <td>GPS enabled <td>0x00=no, 0x01=yes
-<tr class=x><td>0x0051-0x05b  <td>GPS setup <td>?
+<tr class=x><td>0x0051-0x057  <td>GPS setup <td>?
+<tr>        <td>0x0058        <td>SBAS enabled <td>0x00=no, 0x01=yes
+<tr class=x><td>0x0059-0x05a  <td> <td>0xffff
+<tr>        <td>0x005b        <td>GPS logger interval <td>
 <tr class=x><td>0x005c        <td> <td>0x00
-<tr class=c><td>0x005d-0x060  <td> <td>0xffffff
+<tr class=c><td>0x005d-0x05f  <td> <td>0xffffff
+<tr class=x><td>0x0060        <td>selected soft key page? <td>[values seen: 0x00, 0x01]
 <tr>        <td>0x0061        <td>soft key timer <td>0x01=3s, 0x02=5s, 0x03=7s, 0x04=10s, 0x05=15s
 <tr>        <td>0x0062–0x006d <td>soft keys <td>4 groups of 3 keys; 0x00=none
 <tr class=c><td>0x006e–0x006f <td> <td>0xffff
@@ -176,11 +192,11 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <h3 id=setup2>Setup 2</h3>
 <table class=eeprom>
 <tr>        <th>Address       <th>Data <th>Format
-<tr>        <td>0x00b0–0x00b4 <td>DSC address (MMSI) <td>10 nibbles BCD (last nibble zero)
-<tr class=x><td>0x00b5        <td> <td>0x02
-<tr>        <td>0x00b6–0x00ba <td>ATIS code <td>10 nibbles BCD
-<tr class=x><td>0x00bb        <td> <td>0x01
-<tr class=x><td>0x00bc–0x00c3 <td> <td>
+<tr>        <td>0x00b0–0x00b4 <td>own DSC address (MMSI) <td>10 nibbles BCD (last nibble zero)
+<tr class=x><td>0x00b5        <td>own DSC address programmed? <td>? [values seen: 0x01, 0x02]
+<tr>        <td>0x00b6–0x00ba <td>own ATIS code <td>10 nibbles BCD (or 0xff… if not programmed)
+<tr class=x><td>0x00bb        <td>own ATIS code programmed? <td>0x00 = no, 0x01 = yes
+<tr class=x><td>0x00bc–0x00c3 <td> <td>0x011f6f1f2f2f2f5c
 <tr class=x><td>0x00c4-0x00ca <td>DSC setup <td>?
 <tr class=x><td>0x00cb–0x00cf <td> <td>
 <tr class=x><td>0x00d0–0x00df <td> <td>0xff…
@@ -303,7 +319,7 @@ CAN:
 <tr>        <td>0x0–0x1 <td>channel ID <td>2 * char (lower case not supported)
 <tr>        <td>0x2–0x4 <td>Rx frequency <td>5 nibbles BCD (in kHz above 100 MHz)
 <tr class=c><td>0x4     <td>padding? <td>lower nibble: 0x0
-<tr>        <td>0x5–0x7 <td>Tx frequency <td>5 nibbles BCD (in kHz above 100 MHz)
+<tr>        <td>0x5–0x7 <td>Tx frequency <td>5 nibbles BCD (in kHz above 100 MHz) <br>0xfffff = Tx forbidden
 <tr>        <td>0x7     <td>channel definition flags <td>lower nibble: bitmask; see below
 </table>
 <pre>
@@ -325,6 +341,14 @@ Illegal combinations:
 0x0d = xxxx1101
 0x0e = xxxx1110
 </pre>
+
+<h3 id=gm-def>Group Monitor Definition</h3>
+<table class=eeprom>
+<tr>        <th>Offset    <th>Data <th>Format
+<tr>        <td>0x00–0x04 <td>GMID <td>10 nibbles BCD (last nibble zero)
+<tr>        <td>0x04–0x0f <td>GM name <td>
+<tr>        <td>0x10–0x3f <td>member addresses <td>9 * 10 nibbles BCD (last nibble zero) <br>after every third address, a single 0xff byte is inserted
+</table>
 
 <hr>
 
