@@ -7,9 +7,11 @@ body { line-height: 130%; margin: 2em; }
 #github { position: absolute; top: 0; right: 0; border: none; }
 #githubspace { margin-right: 70px; }
 code { color: #800; }
+kbd { background-color: #666; color: white; font-weight: bold; white-space: nowrap; padding: .2em; margin: 0 .2em; }
+kbd.red { background-color: #f45; color: black; }
 table { border-collapse: collapse; }
 table tr td, table tr th, span.example { border: 1px solid #aaa; }
-table.eeprom tr td:first-child { font-family: monospace; }
+table.eeprom tr:not(.rowspan) td:first-child { font-family: monospace; }
 table tr th {background-color: #fdd;}
 table.eeprom code {white-space: pre;}
 hr, h2 { margin-top: 2em; }
@@ -59,7 +61,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x00b0–0x00ff <td>DSC setup? <td><a href=#setup2>Setup 2</a>
 <tr class=c><td>0x0100–0x0107 <td>codename / product string? <td><code>AM057N2</code>
 <tr class=c><td>0x0108–0x010e <td> <td>0xff…
-<tr>        <td>0x010f        <td>region selection (group 3 mode) <td>0x00=CAN, 0x01=UK, 0x02=BE, 0x03=NL, 0x04=SW, 0x05=GRMN
+<tr>        <td>0x010f        <td>region selection (group 3 mode) <td><a href=#regions>Region Selection</a>
 <tr class=c><td>0x0110–0x011f <td> <td>0xff…
 <tr>        <td>0x0120–0x012b <td>channel enabled group 1 <td>bitmask
 <tr class=x><td>0x012c–0x013f <td> <td>0x00… 0xff…
@@ -206,6 +208,31 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr>        <td>0x00f2        <td>GM interval <td>
 <tr class=x><td>0x00f3–0x00ff <td> <td>
 </table>
+
+<h3 id=regions>Region Selection</h3>
+<table class=eeprom>
+<tr><th>Address <th>Data <th>Format
+<tr><td rowspan=2>0x010f <td>HX870E: selection of the region for channel group 3 <td>region code; see below
+<tr class="rowspan c">   <td>HX870: region selection not supported <td>0xff
+</table>
+
+<p>Some HX870E radios are distributed with a <a href=region-selection.jpg type=image/jpeg>leaflet</a> in the packaging explaining how to set a region. The HX870 model (non-E) is apparently hard-coded to only support Canada as a region.
+
+<p>The region can be selected by holding down <kbd>MENU</kbd> and <kbd class=red>16/S</kbd> while turning on the HX870E. The menu described in the <a href=region-selection.jpg type=image/jpeg>leaflet</a> will then appear. Selecting a region will primarily affect channel group 3 and the regional (RG) channels, resetting channel flags and names to whatever the factory settings are for the selected region. The following group 3 regional modes are available for the HX870E:
+
+<table>
+<tr><th>Code <th>Region <th>Region (menu name) <th>Channel Group 3 Name <th>Channels in Group 3 <th>Regional Channels
+<tr><td>0x00 <td>Canada <td>INTERNATIONAL <td>CAN <td>Canadian <td>—
+<tr><td>0x01 <td>British Isles <td>UNITED KINGDOM <td>UK <td>international <td>M, M2
+<tr><td>0x02 <td>North Sea (Belgium) <td>BELGIUM <td>BE <td>international + 31 <td>—
+<tr><td>0x03 <td>North Sea (The Netherlands) <td>NETHERLAND <td>NL <td>international + 31, 37 <td>—
+<tr><td>0x04 <td>Northern Europe <td>SWEDEN <td>SW <td>international <td>L1, L2, L3, F1, F2, F3
+<tr><td>0x05 <td>European inland waterways <td>GERMANY <td>GRMN <td>RAINWAT <td>—
+</table>
+
+<p>Some of the region names Standard Horizon use in the menu are confusing to say the least. For example, a vessel sailing the German Baltic coast would need an international channel plan. It might seem logical to select “INTERNATIONAL” or “GERMANY” as regional mode, but neither one of those would yield an international channel plan in group 3. Instead, you would want to either use the “INTL” channel group 2, which isn’t affected by the regional mode setting at all, or “SWEDEN” mode for channel group 3, which has the benefit of enabling the Danish leisure channels.
+
+<p>Notably, “NETHERLAND” mode provides an international channel plan even though the extra channels are mostly useful in Dutch inland waterways, where <a href=http://www.rainwat.bipt.be>RAINWAT</a> applies. This looks like a firmware bug.
 
 <h3 id=channel-group-def>Channel Group Definition</h3>
 <table class=eeprom>
