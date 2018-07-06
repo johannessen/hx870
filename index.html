@@ -38,6 +38,8 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <p>The significance of memory locations marked with a <span class="x example">yellow background</span> has not been discovered.
 <br>Memory locations marked with a <span class="c example">green background</span> appear to have constant values (padding etc.) and can <em>probably</em> safely be ignored.
 
+<p>0xff is used as a generic unused/disabled/padding value for many fields.
+
 <p>Characters are coded as fixed-length ASCII strings (permissible chars include: <code>A-Za-z0-9 &amp;'*,-.:/[]</code>) with 0xff padding, but apparently many strings cannot be used to their full length due to UI limitations.
 
 <p>DSC addresses presently consist of the nine-digit MMSI and a tenth digit, reserved for future use. They are coded with the full ten digits. The last digit is always zero as per <a href=https://www.itu.int/rec/R-REC-M.1080>Rec. ITU-R M.1080</a>.
@@ -48,11 +50,12 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x0002–0x0007 <td>DW inactive, WX inactive, …? <td>0c010000000000
 <tr>        <td>0x0008        <td>selected channel group <td>
 <tr class=x><td>0x0009–0x000b <td> <td>0x0e0202
-<tr>        <td>0x000c        <td>volume setting <td>numeric (16 steps)
-<tr>        <td>0x000d        <td>squelch setting <td>numeric (16 steps)
+<tr>        <td>0x000c        <td>volume setting <td>numeric (0=min, 15=max)
+<tr>        <td>0x000d        <td>squelch setting <td>numeric (0=open, 15=max)
 <tr class=x><td>0x000e        <td>distress alert status? <td>0x00
 <tr class=x><td>0x000f        <td> <td>0x00
-<tr>        <td>0x0010–0x0013 <td>selected channel <td>0x00 + <a href=#channel-index>Channel Index</a> (twice)
+<tr>        <td>0x0010–0x0011 <td>currently selected channel <td><a href=#channel-index>Channel Index</a>
+<tr>        <td>0x0012–0x0013 <td>channel used before <kbd class=red>16/S</kbd> was pressed <td><a href=#channel-index>Channel Index</a>
 <tr class=x><td>0x0014        <td> <td>0xf0
 <tr class=x><td>0x0015        <td> <td>[values seen: 0x01, 0x04]
 <tr class=c><td>0x0016–0x001f <td> <td>0xff…
@@ -62,7 +65,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=c><td>0x0100–0x0107 <td>codename / product string? <td><code>AM057N2</code>
 <tr class=c><td>0x0108–0x010e <td> <td>0xff…
 <tr>        <td>0x010f        <td>region selection (group 3 mode) <td><a href=#regions>Region Selection</a>
-<tr class=c><td>0x0110–0x011f <td> <td>0xff…
+<tr class=x><td>0x0110–0x011f <td>BCD time stamp of something plus some other data <td>
 <tr>        <td>0x0120–0x012b <td>channel enabled group 1 <td>bitmask
 <tr class=x><td>0x012c–0x013f <td> <td>0x00… 0xff…
 <tr>        <td>0x0140–0x014b <td>channel enabled group 2 <td>bitmask
@@ -84,19 +87,27 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr>        <td>0x01f4–0x01f6 <td>scan mem group EXP <td>bitmask
 <tr class=x><td>0x01f7–0x01ff <td> <td>0x00… 0xff…
 <tr>        <td>0x0200–0x0213 <td>preset list group 1 <td>10 * <a href=#channel-index>Channel Index</a>
-<tr class=c><td>0x0214–0x021f <td> <td>12 * 0xff
+<tr class=x><td>0x0214        <td> <td>[values seen: 0x07, 0xff]
+<tr class=c><td>0x0215–0x021f <td> <td>11 * 0xff
 <tr>        <td>0x0220–0x023f <td>preset list group 2 <td>10 * <a href=#channel-index>Channel Index</a>
 <tr class=c><td>0x0234–0x023f <td> <td>12 * 0xff
 <tr>        <td>0x0240–0x025f <td>preset list group 3 <td>10 * <a href=#channel-index>Channel Index</a>
 <tr class=c><td>0x0254–0x025f <td> <td>12 * 0xff
 <tr class=x><td>0x0260–0x027f <td>preset list for EXP/RG/WX? <td>0xff…
-<tr class=x><td>0x0280–0x02cf <td> <td>
+<tr class=x><td>0x0280–0x028f <td> <td>
+<tr class=c><td>0x0290–0x029f <td> <td>0xff…
+<tr class=x><td>0x02a0–0x02af <td> <td>
+<tr class=c><td>0x02b0–0x02bf <td> <td>0x0001020305080c141e2b40597090b0ff
+<tr class=c><td>0x02c0–0x02cf <td> <td>0x00102030405060708090a0b0c0d0e0f0
 <tr class=x><td>0x02d0–0x02db <td>activation per channel group for RG <td>only 3 least significant bits, one RG channel per byte
 <tr class=c><td>0x02dc–0x02df <td> <td>0xff…
 <tr class=x><td>0x02e0–0x02f3 <td>activation per channel group for EXP <td>only 3 least significant bits, one EXP channel per byte
 <tr class=c><td>0x02f4–0x02ff <td> <td>0xff…
-<tr class=x><td>0x0300–0x04ff <td> <td>
-<tr class=x><td>0x0500–0x05ff <td> <td>
+<tr class=x><td>0x0300–0x037f <td>DSC individual call history? <td>DSC address + 1 unknown byte + <br><a href=#channel-index>Channel Index</a> + 8 byte padding ?
+<tr class=x><td>0x0380–0x04ff <td>DSC group call history? <td>DSC address + 1 unknown byte + <br><a href=#channel-index>Channel Index</a> + 8 byte padding ?
+<tr class=x><td>0x0400–0x04ff <td>more call history? <td>DSC address + 1 unknown byte + 10 byte padding ?
+<tr class=x><td>0x0480–0x04ff <td>more call history? <td>DSC address + 1 unknown byte + 10 byte padding ?
+<tr class=x><td>0x0500–0x05ff <td>more call history? <td>DSC address + 1 unknown byte + 2 byte padding ?
 <tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
@@ -132,7 +143,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x5f00–0x60af <td>DSC log / history (transmitted calls) <td>?
 <tr class=x><td>0x60b0–0x64ff <td> <td>
 <tr class=x><td>0x6500–0x74ff <td>DSC log / history (received “other” calls) <td>?
-<!-- call format: basically first a BCD time stamp, followed by the DSC address and some flags and stuff, ending with the BCD position if available -->
+<!-- call format: basically first a BCD time stamp, followed by the DSC address and some flags and stuff, ending with the BCD position if available; the most significant bit of the entry's first byte is set if the message is unread -->
 <tr class=x><td>0x7500–0x7ffd <td> <td>0xff…
 <tr class=c><td>0x7ffe–0x7fff <td>model number? <td>0x0367 = 871
 </table>
@@ -239,7 +250,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class="rowspan c">   <td>HX870: region selection not supported <td>0xff
 </table>
 
-<p>Some HX870E radios are distributed with a <a href=region-selection.jpg type=image/jpeg>leaflet</a> in the packaging explaining how to set a region. The HX870 model (non-E) is apparently hard-coded to only support Canada as a region.
+<p>HX870E radios are usually distributed with a <a href=region-selection.jpg type=image/jpeg>leaflet</a> in the packaging explaining how to set a region. The HX870 model (non-E) is apparently hard-coded to only support Canada as a region.
 
 <p>The region can be selected by holding down <kbd>MENU</kbd> and <kbd class=red>16/S</kbd> while turning on the HX870E. The menu described in the <a href=region-selection.jpg type=image/jpeg>leaflet</a> will then appear. Selecting a region will primarily affect channel group 3 and the regional (RG) channels, resetting channel flags and names to whatever the factory settings are for the selected region. The following group 3 regional modes are available for the HX870E:
 
@@ -304,7 +315,9 @@ Frequent combinations:
 0x007f = 00000000 01111111 = Tx forbidden
 
 Some other useful combinations:
+0x807f = 10000000 01111111 = duplex channel, Tx forbidden
 0x987f = 10011000 01111111 = duplex channel, defaults to 1W<!--  (30)-->
+0x187f = 00011000 01111111 = simplex channel, defaults to 1W
 0x197f = 00011001 01111111 = simplex "A" channel, defaults to 1W<!--  (37A)-->
 0x5a7f = 01011010 01111111 = simplex "B" channel, defaults to 1W<!--  (96B)-->
 0x180a = 00011000 00001010 = simplex "10" channel, defaults to 1W<!--  (VDES)-->
