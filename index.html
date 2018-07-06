@@ -52,7 +52,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr>        <td>0x000d        <td>squelch setting <td>numeric (16 steps)
 <tr class=x><td>0x000e        <td>distress alert status? <td>0x00
 <tr class=x><td>0x000f        <td> <td>0x00
-<tr>        <td>0x0010–0x0013 <td>selected channel <td>0x00 + channel (twice)
+<tr>        <td>0x0010–0x0013 <td>selected channel <td>0x00 + <a href=#channel-index>Channel Index</a> (twice)
 <tr class=x><td>0x0014        <td> <td>0xf0
 <tr class=x><td>0x0015        <td> <td>[values seen: 0x01, 0x04]
 <tr class=c><td>0x0016–0x001f <td> <td>0xff…
@@ -83,11 +83,11 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr>        <td>0x01f2–0x01f3 <td>scan mem group RG <td>bitmask
 <tr>        <td>0x01f4–0x01f6 <td>scan mem group EXP <td>bitmask
 <tr class=x><td>0x01f7–0x01ff <td> <td>0x00… 0xff…
-<tr>        <td>0x0200–0x0213 <td>preset list group 1 <td>10 * <a href=#preset>Preset</a>
+<tr>        <td>0x0200–0x0213 <td>preset list group 1 <td>10 * <a href=#channel-index>Channel Index</a>
 <tr class=c><td>0x0214–0x021f <td> <td>12 * 0xff
-<tr>        <td>0x0220–0x023f <td>preset list group 2 <td>10 * <a href=#preset>Preset</a>
+<tr>        <td>0x0220–0x023f <td>preset list group 2 <td>10 * <a href=#channel-index>Channel Index</a>
 <tr class=c><td>0x0234–0x023f <td> <td>12 * 0xff
-<tr>        <td>0x0240–0x025f <td>preset list group 3 <td>10 * <a href=#preset>Preset</a>
+<tr>        <td>0x0240–0x025f <td>preset list group 3 <td>10 * <a href=#channel-index>Channel Index</a>
 <tr class=c><td>0x0254–0x025f <td> <td>12 * 0xff
 <tr class=x><td>0x0260–0x027f <td>preset list for EXP/RG/WX? <td>0xff…
 <tr class=x><td>0x0280–0x02cf <td> <td>
@@ -145,11 +145,34 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 
 <p class=x>There is apparently some sort of bug affecting the call time and position time in the call log; the hours of the two times don’t match, but the minutes do. YCE15 says both times are supposed to be UTC. Is this an issue with calculating time zones or just a wrong label in YCE15?
 
+<h3 id=channel-index>Channel Index</h3>
+<table class=eeprom>
+<tr>        <th>Offset    <th>Data <th>Format
+<tr class=x><td>0x0     <td>status <td>0x00=in use, 0xff=not in use
+<tr>        <td>0x1     <td>channel <td>numeric 1-based index
+</table>
+
+<p>The “channel index” is used to specify individual channels in the memory image. This is simply the position of the respective channel in the channel list of the respective channel group, starting with 1. For example, the “USA” channel group begins with channel 01A, so the number 1 would refer to that channel; number 2 would refer to the next-higher channel, which in “USA” mode is channel 03A; and so on.
+
+<p>Note that none of the default channel lists are fully consecutive. Many have extra channels inserted (for example, Canadian channel 25B is inserted between channels 25 and 26), and for historical reasons, the international channel plan has a big gap before channel 60. Therefore the only way to determine or to resolve channel references is to get a list of all your channels (for example in YCE15 or in the radio itself) and count down from the top, starting with 1 for your first channel. An easy way to do this might be to list all your channels in a spreadsheet application.
+
+<p>“RG” regional and “EXP” expansion channels are appended at the end of the channel list in that order (perhaps “WX” weather channels, too – not sure about these).
+
+<!-- TODO: ready-made table of channel indices for the 8 default groups -->
+
+<p class=x>I’m not 100 % sure the count matches my data here. The issue appears to be in the upper channels. Does channel 70 maybe not count in the index? How about other "transmission forbidden" channels? Or am I simply counting wrong after all?
+
+<p id=preset>The status byte can be used in the preset lists to signal whether that preset is enabled. For other uses of the channel index, it is usually zero.
+
+<p class=x>Sometimes the status byte duplicates the channel rather than being zero. The significance of this is unclear.
+
+<p>There is some sort of bug in the YCE15 software version 2.0.0.4 that can result in unusable Presets. For example, when setting an “EXP” channel as a preset (possibly also when simply setting a preset to “none”), byte values in the range of 0x81–0xff are set. This results in channels with unusual numbers like “00” or “43” in the radio that give off funny noises when they’re selected.
+
 <h3 id=setup1>Setup 1</h3>
 <table class=eeprom>
 <tr>        <th>Address       <th>Data <th>Format
-<tr>        <td>0x0020–0x0025 <td>priority channels <td>3 * numeric (2 bytes; 0xffff=none)
-<tr>        <td>0x0026–0x002b <td>sub channels <td>3 * numeric (2 bytes; 0xffff=none)
+<tr>        <td>0x0020–0x0025 <td>priority channels (per group) <td>3 * <a href=#channel-index>Channel Index</a>
+<tr>        <td>0x0026–0x002b <td>sub channels (per group) <td>3 * <a href=#channel-index>Channel Index</a>
 <tr class=x><td>0x002c–0x002f <td> <td>0xffffff02
 <tr>        <td>0x0030        <td>display backlight <td>numeric (0=off, 5=max)
 <tr>        <td>0x0031        <td>display contrast <td>numeric
@@ -246,15 +269,6 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 </table>
 
 <p class=x>Does the “enable ATIS” flag do anything for the EXP group?
-
-<h3 id=preset>Preset</h3>
-<table class=eeprom>
-<tr>        <th>Offset    <th>Data <th>Format
-<tr>        <td>0x0     <td>preset in use <td>0x00=in use, 0xff=not in use
-<tr>        <td>0x1     <td>channel reference <td>1-based index in the channel list <br>(with RG and EXP immediately after the group's channels)
-</table>
-
-<p>There is some sort of bug in the YCE15 software version 2.0.0.4 that can result in unusable Presets. For example, when setting an EXP channel as a preset (possibly also when simply setting a preset to “none”), byte values in the range of 0x81–0xff are set. This results in channels like “00” or “43” in the radio that give off funny noises when they’re selected.
 
 <h3 id=channel-flags>Marine Channel Flags</h3>
 <table class=eeprom>
