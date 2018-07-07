@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang=en>
 <meta charset=UTF-8>
-<title>Standard Horizon HX870E</title>
+<title>Standard Horizon HX870</title>
 <style>
 body { line-height: 130%; margin: 2em; }
 #github { position: absolute; top: 0; right: 0; border: none; }
 #githubspace { margin-right: 70px; }
 code { color: #800; }
 kbd { background-color: #666; color: white; font-weight: bold; white-space: nowrap; padding: .2em; margin: 0 .2em; }
-kbd.red { background-color: #f45; color: black; }
+kbd.red { background-color: #f56; color: black; }
 table { border-collapse: collapse; }
 table tr td, table tr th, span.example { border: 1px solid #aaa; }
 table.eeprom tr:not(.rowspan) td:first-child { font-family: monospace; }
@@ -20,20 +20,26 @@ pre { font-size: .8em; line-height: 120%; }
 td, span.example { padding: .2ex .2em; }
 p.x { background-color: #ffd; padding: .4ex .4em; border: 1px solid #cc6; }
 tr.x td, .x.example { background-color: #ffd; } /* unknown */
-tr.c td, .c.example { background-color: #dfd; } /* probable constant value or padding */
+tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constant value or padding */
 </style>
 
-<h1>Standard Horizon HX870E</h1>
+<h1>Standard Horizon HX870 / HX870E</h1>
 
-<p id=githubspace>The <a href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;DivisionID=3&amp;ProdCatID=85&amp;ProdID=1791">HX870E</a> is the successor to the Standard Horizon HX851E marine VHF radio. This page was inspired by a <a href=http://www.paul.sladen.org/toys/vertex/hx851e.html>collection of information about the HX851E</a> by someone else. I created this page for my own use, then decided it might also be of use to others.
+<p id=githubspace>The <a href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;DivisionID=3&amp;ProdCatID=85&amp;ProdID=1791">HX870</a> is the successor to the Standard Horizon HX851 marine VHF radio. This page was inspired by a <a href=http://www.paul.sladen.org/toys/vertex/hx851e.html>collection of information about the HX851</a> by Paul Sladen. I originally created this page for my own use, then decided it might also be of use to others.
 
-<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was mostly gathered by playing around some with my HX870E (firmware version 2.03) and YCE15 software version 2.0.0.4, but includes a few things I learned from other users as well. It may not apply to a plain HX870 or even another HX870E.
+<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was gathered by playing around some with HX870 and HX870E radios and the YCE15 software that goes with it. Several radio users contributed information to this page; <a href="http://www.marine-dsc.org/contact-us/">Norm Perron</a> and <a href="https://github.com/cr">Christiane Rütten</a> were particularly helpful.
 
 <p><strong>Disclaimer:</strong> Modifying the memory image directly using a hex editor is likely not a supported function of the device or its accompanying software. As such, it might <strong>void your warranty</strong> or <strong>brick the radio</strong> or even put it into a state where it transmits or receives on frequencies forbidden by international <a href=https://www.itu.int/pub/R-REG-RR/e>Radio Regulations</a>, local regulations (<a href=https://www.fcc.gov/wireless/bureau-divisions/mobility-division/maritime-mobile-service>FCC</a> / <a href=https://www.bundesnetzagentur.de/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/SpezielleAnwendungen/Seefunk/Seefunk-node.html>BNetzA</a> / …) or local law. Using the radio in such a state might disrupt vital safety-of-life services. Many jurisdictions impose a <strong>fine or criminal penalty</strong> on it. You should not mess around with any of this stuff unless you know what you’re doing! And, to finally state the obvious: Whatever <em>you</em> do, <em>I</em> cannot be held responsible for it.
+
+<h2 id=protocol>Serial protocol</h2>
+
+<p>Please refer to the documentation of the <a href="https://github.com/cr/hx870">HX870 Python tools</a>.
 
 <h2 id=memory>Memory image</h2>
 
 <p>32kB EEPROM, stored by Standard Horizon’s YCE15 software as a *.dat file
+
+<p>If you own <a href="https://www.sweetscape.com/010editor/">010 Editor</a>, you may find the <a href="https://github.com/cr/hx870/blob/master/hx870dat.bt">binary template</a> included with the HX870 Python tools most useful. The <a href="https://github.com/cr/hx870">Python tools</a> also allow reading and writing the radio’s EEPROM on operating systems that can’t run YCE15, such as macOS.
 
 <p>The significance of memory locations marked with a <span class="x example">yellow background</span> has not been discovered.
 <br>Memory locations marked with a <span class="c example">green background</span> appear to have constant values (padding etc.) and can <em>probably</em> safely be ignored.
@@ -46,13 +52,16 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 
 <table class=eeprom>
 <tr>        <th>Address       <th>Data <th>Format
-<tr class=c><td>0x0000–0x0001 <td>model number? <td>0x0367 = 871
-<tr class=x><td>0x0002–0x0007 <td>DW inactive, WX inactive, …? <td>0c010000000000
+<tr class=c><td>0x0000–0x0001 <td>magic number <td>0x0367 = 871
+<tr class=x><td>0x0002–0x0005 <td>DW inactive, WX inactive, …? <td>0x01000000
+<tr class=x><td>0x0006        <td> <td>[values seen: 0x00, 0x02]
+<tr class=x><td>0x0007        <td> <td>0x00
 <tr>        <td>0x0008        <td>selected channel group <td>
-<tr class=x><td>0x0009–0x000b <td> <td>0x0e0202
+<tr class=x><td>0x0009–0x000a <td> <td>0x0e02
+<tr class=x><td>0x000b        <td> <td>[values seen: 0x01, 0x02]
 <tr>        <td>0x000c        <td>volume setting <td>numeric (0=min, 15=max)
 <tr>        <td>0x000d        <td>squelch setting <td>numeric (0=open, 15=max)
-<tr class=x><td>0x000e        <td>distress alert status? <td>0x00
+<tr class=x><td>0x000e        <td>distress alert status? <td>usually 0x00
 <tr class=x><td>0x000f        <td> <td>0x00
 <tr>        <td>0x0010–0x0011 <td>currently selected channel <td><a href=#channel-index>Channel Index</a>
 <tr>        <td>0x0012–0x0013 <td>channel used before <kbd class=red>16/S</kbd> was pressed <td><a href=#channel-index>Channel Index</a>
@@ -61,42 +70,56 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=c><td>0x0016–0x001f <td> <td>0xff…
 <tr>        <td>0x0020–0x006f <td>device setup <td><a href=#setup1>Setup 1</a>
 <tr>        <td>0x0070–0x00af <td>channel group names <td>4 * <a href=#channel-group-def>Channel Group Definition</a>
-<tr class=x><td>0x00b0–0x00ff <td>DSC setup? <td><a href=#setup2>Setup 2</a>
-<tr class=c><td>0x0100–0x0107 <td>codename / product string? <td><code>AM057N2</code>
+<tr>        <td>0x00b0–0x00ff <td>DSC setup <td><a href=#setup2>Setup 2</a>
+<tr class=c><td>0x0100–0x0107 <td>flash ID <td><code>AM057N2</code>
 <tr class=c><td>0x0108–0x010e <td> <td>0xff…
 <tr>        <td>0x010f        <td>region selection (group 3 mode) <td><a href=#regions>Region Selection</a>
 <tr class=x><td>0x0110–0x011f <td>BCD time stamp of something plus some other data <td>
 <tr>        <td>0x0120–0x012b <td>channel enabled group 1 <td>bitmask
-<tr class=x><td>0x012c–0x013f <td> <td>0x00… 0xff…
+<tr class=c><td>0x012c–0x012f <td> <td>0x00000000
+<tr class=c><td>0x0130–0x013f <td> <td>[values seen: 0x00…, 0xff…]
 <tr>        <td>0x0140–0x014b <td>channel enabled group 2 <td>bitmask
-<tr class=x><td>0x014c–0x015f <td> <td>0x00… 0xff…
+<tr class=c><td>0x014c–0x014f <td> <td>0x00000000
+<tr class=c><td>0x0150–0x015f <td> <td>[values seen: 0x00…, 0xff…]
 <tr>        <td>0x0160–0x016b <td>channel enabled group 3 <td>bitmask
-<tr class=x><td>0x016c–0x017f <td> <td>0x00… 0xff…
+<tr class=c><td>0x016c–0x016f <td> <td>0x00000000
+<tr class=c><td>0x0170–0x017f <td> <td>[values seen: 0x00…, 0xff…]
 <tr>        <td>0x0180–0x0181 <td>channel enabled group WX <td>bitmask
 <tr>        <td>0x0182–0x0183 <td>channel enabled group RG <td>bitmask
 <tr>        <td>0x0184–0x0186 <td>channel enabled group EXP <td>bitmask
-<tr class=x><td>0x0187–0x018f <td> <td>0x00… 0xff…
+<tr class=c><td>0x0187–0x0188 <td> <td>[values seen: 0x0000, 0xffff]
+<tr class=c><td>0x0189–0x018f <td> <td>0xff…
 <tr>        <td>0x0190–0x019b <td>scan mem group 1 <td>bitmask
-<tr class=x><td>0x019c–0x01af <td> <td>0x00… 0xff…
+<tr class=c><td>0x019c–0x01a8 <td> <td>0x00…
+<tr class=c><td>0x01a9–0x01ad <td> <td>[values seen: 0x00…, 0xff…]
+<tr class=c><td>0x01ae–0x01af <td> <td>0xffff
 <tr>        <td>0x01b0–0x01bb <td>scan mem group 2 <td>bitmask
-<tr class=x><td>0x01bc–0x01cf <td> <td>0x00… 0xff…
+<tr class=c><td>0x01bc–0x01c8 <td> <td>0x00…
+<tr class=c><td>0x01c9–0x01cd <td> <td>[values seen: 0x00…, 0xff…]
+<tr class=c><td>0x01ce–0x01cf <td> <td>0xffff
 <tr>        <td>0x01d0–0x01db <td>scan mem group 3 <td>bitmask
-<tr class=x><td>0x01dc–0x01ef <td> <td>0x00… 0xff…
+<tr class=c><td>0x01dc–0x01e8 <td> <td>0x00…
+<tr class=c><td>0x01e9–0x01ed <td> <td>[values seen: 0x00…, 0xff…]
+<tr class=c><td>0x01ee–0x01ef <td> <td>0xffff
 <tr>        <td>0x01f0–0x01f1 <td>scan mem group WX <td>bitmask
 <tr>        <td>0x01f2–0x01f3 <td>scan mem group RG <td>bitmask
 <tr>        <td>0x01f4–0x01f6 <td>scan mem group EXP <td>bitmask
-<tr class=x><td>0x01f7–0x01ff <td> <td>0x00… 0xff…
+<tr class=c><td>0x01f7–0x01f8 <td> <td>0x0000
+<tr class=c><td>0x01f9–0x01fb <td> <td>[values seen: 0x00…, 0xff…]
+<tr class=c><td>0x01fc–0x01ff <td> <td>0xff…
 <tr>        <td>0x0200–0x0213 <td>preset list group 1 <td>10 * <a href=#channel-index>Channel Index</a>
-<tr class=x><td>0x0214        <td> <td>[values seen: 0x07, 0xff]
-<tr class=c><td>0x0215–0x021f <td> <td>11 * 0xff
+<tr class=x><td>0x0214        <td> <td>[values seen: 0x07, 0x09, 0xff]
+<tr class=c><td>0x0215–0x021f <td> <td>0xff…
 <tr>        <td>0x0220–0x023f <td>preset list group 2 <td>10 * <a href=#channel-index>Channel Index</a>
-<tr class=c><td>0x0234–0x023f <td> <td>12 * 0xff
+<tr class=x><td>0x0234        <td> <td>0xff
+<tr class=c><td>0x0235–0x023f <td> <td>0xff…
 <tr>        <td>0x0240–0x025f <td>preset list group 3 <td>10 * <a href=#channel-index>Channel Index</a>
-<tr class=c><td>0x0254–0x025f <td> <td>12 * 0xff
-<tr class=x><td>0x0260–0x027f <td>preset list for EXP/RG/WX? <td>0xff…
-<tr class=x><td>0x0280–0x028f <td> <td>
+<tr class=x><td>0x0254        <td> <td>0xff
+<tr class=c><td>0x0255–0x025f <td> <td>0xff…
+<tr class=c><td>0x0260–0x027f <td> <td>0xff…
+<tr class=x><td>0x0280–0x028f <td> <td>values seen: <br>0x 8f4e 2daf d24b 6946 708a b496 1980 ffff <br>0x 9555 3174 d84a ab3b 6e8a 53cf 197e ffff
 <tr class=c><td>0x0290–0x029f <td> <td>0xff…
-<tr class=x><td>0x02a0–0x02af <td> <td>
+<tr class=x><td>0x02a0–0x02af <td> <td>values seen: <br>0x 1a1a 1a1a 1005 0504 0301 1a05 ffff ffff <br>0x 0a0f 1419 1f02 0202 0202 0f02 00ff ffff
 <tr class=c><td>0x02b0–0x02bf <td> <td>0x0001020305080c141e2b40597090b0ff
 <tr class=c><td>0x02c0–0x02cf <td> <td>0x00102030405060708090a0b0c0d0e0f0
 <tr class=x><td>0x02d0–0x02db <td>activation per channel group for RG <td>only 3 least significant bits, one RG channel per byte
@@ -145,12 +168,14 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr class=x><td>0x6500–0x74ff <td>DSC log / history (received “other” calls) <td>?
 <!-- call format: basically first a BCD time stamp, followed by the DSC address and some flags and stuff, ending with the BCD position if available; the most significant bit of the entry's first byte is set if the message is unread -->
 <tr class=x><td>0x7500–0x7ffd <td> <td>0xff…
-<tr class=c><td>0x7ffe–0x7fff <td>model number? <td>0x0367 = 871
+<tr class=c><td>0x7ffe–0x7fff <td>magic number <td>0x0367 = 871
 </table>
 
-<p>There is a bug in the YCE15 software version 2.0.0.4 that can cause corruption of the DSC individual directory (likely also other directories) when opening a memory image file containing directory entries that are not alphabetically sorted. However, the bug is only triggered when the “Individual Directory” item is chosen in YCE15. If instead the memory image is directly programmed into the device without first viewing the directory in YCE15, the result is just fine.
+<p>There is a bug in the YCE15 software versions 2.0.0.4 and 2.0.1.0 that can cause corruption of the DSC individual directory (likely also other directories) when opening a memory image file containing directory entries that are not alphabetically sorted. However, the bug is only triggered when the “Individual Directory” item is chosen in YCE15. If instead the memory image is directly programmed into the device without first viewing the directory in YCE15, the result is just fine.
 
-<p class=x>The YCE15 software apparently manages to determine the radio model from the memory image. Non-E models don’t get the ATIS setup. How does that work?
+<p class=x>Apparently the firmware “knows” whether the radio model is a HX870 or a HX870E independent of the accessible memory content. Non-E models don’t get the region selection menu. However, it would seem logical for this to be defined in software rather than hardware. How does that work? Does perhaps the Windows firmware update software silently modify the firmware based on whether or not an E model is detected before the update (possibly using byte 0x010f)?
+
+<p class=x>An issue seems to sometimes prevent reading values of certain fields from the radio’s memory. This affects memory locations 0x0006, 0x000b–0x000d, 0x0110–0x011f amongst many others. Instead of the true values of those fields, default or padding values appear to be returned. However, locations 0x0010–0x013 and 0x0060 are not affected. While it is not yet clear whether this is an issue with the firmware or YCE15, reading the memory using pyhx870 appears to often yield the true values.
 
 <p class=x>The “activation per channel group” for RG and EXP doesn’t seem to work as I think it should. This ought to be solvable, as the region modes UK and SW contain RG channels that use these activation bits.
 
@@ -175,7 +200,7 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 
 <p id=preset>The status byte can be used in the preset lists to signal whether that preset is enabled. For other uses of the channel index, it is usually zero.
 
-<p class=x>Sometimes the status byte duplicates the channel rather than being zero. The significance of this is unclear.
+<p class=x>Sometimes the status byte duplicates the channel byte's value rather than being zero. Different values have also been observed. The significance of this is unclear.
 
 <p>There is some sort of bug in the YCE15 software version 2.0.0.4 that can result in unusable Presets. For example, when setting an “EXP” channel as a preset (possibly also when simply setting a preset to “none”), byte values in the range of 0x81–0xff are set. This results in channels with unusual numbers like “00” or “43” in the radio that give off funny noises when they’re selected.
 
@@ -185,63 +210,145 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <tr>        <td>0x0020–0x0025 <td>priority channels (per group) <td>3 * <a href=#channel-index>Channel Index</a>
 <tr>        <td>0x0026–0x002b <td>sub channels (per group) <td>3 * <a href=#channel-index>Channel Index</a>
 <tr class=x><td>0x002c–0x002f <td> <td>0xffffff02
-<tr>        <td>0x0030        <td>display backlight <td>numeric (0=off, 5=max)
-<tr>        <td>0x0031        <td>display contrast <td>numeric
-<tr>        <td>0x0032        <td>key beep <td>
+<tr>        <td>0x0030        <td>display backlight dimmer <td>numeric (0=off, 5=max)
+<tr>        <td>0x0031        <td>display contrast <td>numeric (0=min, 30=max)
+<tr>        <td>0x0032        <td>key beep volume <td>numeric (0=off, 5=max)
 <tr class=x><td>0x0033        <td> <td>0x01
 <tr>        <td>0x0034        <td>multi watch <td>0x00=dual, 0x01=triple
 <tr class=x><td>0x0035        <td> <td>0x01
 <tr>        <td>0x0036        <td>scan type <td>0x00=memory, 0x01=priority
 <tr>        <td>0x0037        <td>scan resume time <td>
-<tr>        <td>0x0038        <td>weather alert <td>
+<tr>        <td>0x0038        <td>weather alert <td>0x00=off, 0x01=on
 <tr class=x><td>0x0039        <td> <td>0x00
-<tr>        <td>0x003a        <td>emergency LED <td>0x00=continuous, 0x01=SOS, …
+<tr>        <td>0x003a        <td>emergency LED <td>0x00=continuous, 0x01=SOS, 0x02=Blink1, 0x03=Blink2, 0x04=Blink3
 <tr>        <td>0x003b        <td>water hazard LED <td>0x00=off, 0x01=on, 0x02=power-on
-<tr>        <td>0x003c        <td>lamp <td>
-<tr>        <td>0x003d        <td>AF pitch CONT <td>0x00=normal, 0x01=high-low-cut, …
+<tr>        <td>0x003c        <td>lamp <td>0x00=off, 0x01=3s, 0x02=5s, 0x03=10s, 0x04=20s, 0x05=30s, 0x06=continuous
+<tr>        <td>0x003d        <td>AF pitch CONT <td>0x00=normal, 0x01=high-low-cut, 0x02=high-low-boost, 0x03=low-boost, 0x04=high-boost
 <tr>        <td>0x003e        <td>battery save <td>0x00=off, 0x01=50%, 0x02=70%, 0x03=80%, 0x04=90%
 <tr class=c><td>0x003f        <td> <td>0xff
 <tr>        <td>0x0040        <td>VOX <td>0x00=off, 0x01=on
-<tr>        <td>0x0041        <td>VOX level <td>
-<tr>        <td>0x0042        <td>VOX delay time <td>
+<tr>        <td>0x0041        <td>VOX level <td>numeric (0=min, 4=max)
+<tr>        <td>0x0042        <td>VOX delay time <td>0x00=0.5s, 0x01=1.0s, 0x02=1.5s, 0x03=2.0s, 0x04=3.0s
 <tr>        <td>0x0043        <td>noise cancel Rx <td>
 <tr>        <td>0x0045        <td>noise cancel Tx <td>0x00=off, 0x01=on
 <tr class=x><td>0x0046-0x049  <td> <td>0x00ffffff
-<tr>        <td>0x004a        <td>nav display range <td>
+<tr>        <td>0x004a        <td>nav display range <td>0x00=auto, 0x01=2M, 0x02=5M, 0x03=10M, 0x04=25M
 <tr class=x><td>0x004b        <td> <td>0xff
-<tr>        <td>0x004c        <td>nav arrival range <td>
-<tr>        <td>0x004d        <td>nav routing operation <td>
+<tr>        <td>0x004c        <td>nav arrival range <td>0x00=0.05M, 0x01=0.1M, 0x02=0.2M, 0x03=0.5M, 0x04=1.0M
+<tr>        <td>0x004d        <td>nav routing operation <td>0x00=auto, 0x01=manual
 <tr class=c><td>0x004e-0x04f  <td> <td>0xffff
-<tr>        <td>0x0050        <td>GPS enabled <td>0x00=no, 0x01=yes
-<tr class=x><td>0x0051-0x057  <td>GPS setup <td>?
-<tr>        <td>0x0058        <td>SBAS enabled <td>0x00=no, 0x01=yes
-<tr class=x><td>0x0059-0x05a  <td> <td>0xffff
+<tr>        <td>0x0050        <td>GPS enabled <td>0x00=no, 0x01=yes (when radio is switched on), 0x02=always (even when radio is switched off)
+<tr>        <td>0x0051        <td>GPS power save <td>0x00=off, 0x01=auto, 0x02=50%, 0x03=75%, 0x04=90%
+<tr>        <td>0x0052        <td>GPS location format <td>0x00=ddd°mm′ss″, 0x01=ddd°mm.mm′, 0x02=ddd°mm.mmmm′
+<tr>        <td>0x0053        <td>GPS time setup <td>bitmask; see below
+<tr>        <td>0x0054        <td>speed units <td>0x00=knots, 0x01=mph, 0x02=km/h
+<tr>        <td>0x0055        <td>distance units <td>0x00=nm, 0x01=sm, 0x02=km
+<tr>        <td>0x0056        <td>altitude units <td>0x00=feet, 0x01=metres
+<tr>        <td>0x0057        <td>GPS pinning <td>0x00=no, 0x01=yes
+<tr>        <td>0x0058        <td><abbr title="satellite-based augmentation system, e. g. WAAS / EGNOS">SBAS</abbr> enabled <td>0x00=no, 0x01=yes
+<tr>        <td>0x0059        <td>map orientation <td>0x00=north-up, 0x01=course-up
+<tr>        <td>0x005a        <td>GPS output sentences <td>bitmask; see below
 <tr>        <td>0x005b        <td>GPS logger interval <td>
 <tr class=x><td>0x005c        <td> <td>0x00
 <tr class=c><td>0x005d-0x05f  <td> <td>0xffffff
-<tr class=x><td>0x0060        <td>selected soft key page? <td>[values seen: 0x00, 0x01]
+<tr>        <td>0x0060        <td>selected soft key page <td>numeric
 <tr>        <td>0x0061        <td>soft key timer <td>0x01=3s, 0x02=5s, 0x03=7s, 0x04=10s, 0x05=15s
-<tr>        <td>0x0062–0x006d <td>soft keys <td>4 groups of 3 keys; 0x00=none
+<tr>        <td>0x0062–0x0064 <td>soft key page 0 <td>3 soft keys; see below
+<tr>        <td>0x0065–0x0067 <td>soft key page 1 <td>3 soft keys; see below
+<tr>        <td>0x0068–0x006a <td>soft key page 2 <td>3 soft keys; see below
+<tr>        <td>0x006b–0x006d <td>soft key page 3 <td>3 soft keys; see below
 <tr class=c><td>0x006e–0x006f <td> <td>0xffff
+</table>
+
+<p><strong>GPS Time Setup</strong>
+<pre>
+0x80 = 1xxxxxxx = local time (0 = UTC)
+0x40 = x1xxxxxx = 24 hour clock (0 = AM/PM)
+0x20 = xx1xxxxx = time offset has positive sign (0 = negative sign)
+0x08 = xxx11111 = time offset in half hours
+
+Examples:
+0x60 = 01100000 = UTC
+0xe2 = 11100010 = British Summer Time (UTC +01:00)
+0xe4 = 11100100 = Central European Summer Time (UTC +02:00)
+0x9e = 10001110 = Pacific Daylight Time AM/PM (UTC -07:00)
+</pre>
+
+<p><strong>GPS Output Sentences</strong>
+<pre>
+0xc0 = 11xxxxxx - unused
+0x20 = xx1xxxxx = DSC/DSE
+0x10 = xxx1xxxx = RMC
+0x08 = xxxx1xxx = GSV
+0x04 = xxxxx1xx = GSA
+0x02 = xxxxxx1x = GGA
+0x01 = xxxxxxx1 = GLL
+</pre>
+
+<table>
+<tr><th>Code <th>Soft Key
+<tr><td>0x00 <td>none
+<tr><td>0x01 <td>H/M/L transmit power
+<tr><td>0x02 <td>WX / CH
+<tr><td>0x03 <td>SCAN
+<tr><td>0x04 <td>Dual Watch
+<tr><td>0x05 <td>WPT MARK
+<tr><td>0x06 <td>COMPASS
+<tr><td>0x07 <td>Waypoint
+<tr><td>0x08 <td>MOB
+<tr><td>0x09 <td>SCAN Memory
+<tr><td>0x0a <td>PRESET
+<tr><td>0x0b <td>STROBE
+<tr><td>0x0c <td>CH NAME
+<tr><td>0x0d <td>LOGGER
+<tr><td>0x0e <td>Noise Cancel
 </table>
 
 <h3 id=setup2>Setup 2</h3>
 <table class=eeprom>
 <tr>        <th>Address       <th>Data <th>Format
 <tr>        <td>0x00b0–0x00b4 <td>own DSC address (MMSI) <td>10 nibbles BCD (last nibble zero)
-<tr class=x><td>0x00b5        <td>own DSC address programmed? <td>? [values seen: 0x01, 0x02]
+<tr class=x><td>0x00b5        <td>own DSC address programmed <td>0x00=no, 0x01=once?, 0x02=twice?
 <tr>        <td>0x00b6–0x00ba <td>own ATIS code <td>10 nibbles BCD (or 0xff… if not programmed)
-<tr class=x><td>0x00bb        <td>own ATIS code programmed? <td>0x00 = no, 0x01 = yes
+<tr>        <td>0x00bb        <td>own ATIS code programmed <td>0x00=no, 0x01=yes
 <tr class=x><td>0x00bc–0x00c3 <td> <td>0x011f6f1f2f2f2f5c
-<tr class=x><td>0x00c4-0x00ca <td>DSC setup <td>?
-<tr class=x><td>0x00cb–0x00cf <td> <td>
-<tr class=x><td>0x00d0–0x00df <td> <td>0xff…
+<tr class=x><td>0x00c4        <td> <td>[values seen: 0x78, 0xf8]
+<tr>        <td>0x00c5        <td>DSC beep settings <td>bitmask; see below
+<tr class=x><td>0x00c6        <td> <td>[values seen: 0x03, 0x04]
+<tr>        <td>0x00c7        <td>IndividualRing <td>0x00=5s, 0x01=10s, 0x02=15s, 0x03=20s, 0x04=120s
+<tr>        <td>0x00c8        <td>no act timer <td>0x00=1min, 0x01=3min, 0x02=5min, 0x03=10min, 0x04=15min
+<tr>        <td>0x00c9        <td>CH switch timer <td>0x00=off, 0x01=10s, 0x02=30s, 0x03=60s, 0x04=120s
+<tr>        <td>0x00ca        <td>POS fix wait <td>0x00=15s, 0x01=30s, 0x02=60s, 0x03=90s, 0x04=120s
+<tr class=x><td>0x00cb–0x00cf <td> <td>0xff01ff0000
+<tr class=c><td>0x00d0–0x00df <td> <td>0xff…
 <tr class=x><td>0x00e0        <td> <td>0x00
-<tr class=x><td>0x00e1-0x00e2 <td>DSC setup (Auto POS) <td>?
-<tr class=x><td>0x00e3–0x00f1 <td> <td>
-<tr>        <td>0x00f2        <td>GM interval <td>
-<tr class=x><td>0x00f3–0x00ff <td> <td>
+<tr>        <td>0x00e1        <td>auto POS polling <td>0x00=request, 0x01=report
+<tr>        <td>0x00e2        <td>auto POS time <td>0x00=30s, 0x01=1min, 0x02=2min, 0x03=3min, 0x04=5min
+<tr class=x><td>0x00e3–0x00e4 <td> <td>0x0200
+<tr class=x><td>0x00e5–0x00e6 <td> <td>[values seen: 0x4630, 0x8cff]
+<tr class=c><td>0x00e7–0x00ef <td> <td>0xff…
+<tr class=x><td>0x00f0–0x00f1 <td> <td>0x0002
+<tr>        <td>0x00f2        <td>GM interval <td>0x00=1min, 0x01=3min, 0x02=5min, 0x03=10min, 0x04=15min
+<tr class=x><td>0x00f3        <td> <td>[values seen: 0x03, 0xff]
+<tr class=x><td>0x00f4        <td> <td>0x00
+<tr class=x><td>0x00f5–0x00f6 <td> <td>[values seen: 0x4630, 0x8cff]
+<tr class=c><td>0x00f7–0x00ff <td> <td>0xff…
 </table>
+
+<p><strong>DSC Beep Settings</strong>
+<pre>
+0x80 = 1xxxxxxx = Individual
+0x40 = x1xxxxxx = All Ships
+0x20 = xx1xxxxx = Group
+0x10 = xxx1xxxx = Position Request
+0x08 = xxxx1xxx = Position Report
+0x04 = xxxxx1xx = Geographic
+0x02 = xxxxxx1x = Polling
+0x01 = xxxxxxx1 = Test Call
+
+Default value:
+0xec = 11101100 = always, except for POS requests, polling, and test calls
+</pre>
 
 <h3 id=regions>Region Selection</h3>
 <table class=eeprom>
@@ -271,15 +378,15 @@ tr.c td, .c.example { background-color: #dfd; } /* probable constant value or pa
 <h3 id=channel-group-def>Channel Group Definition</h3>
 <table class=eeprom>
 <tr>        <th>Offset  <th>Data <th>Format
-<tr>        <td>0x0     <td>channel group enabled <td>0x00 = no, 0x01 = yes
+<tr>        <td>0x0     <td>channel group enabled <td>0x00=no, 0x01=yes
 <tr class=x><td>0x1     <td>ATIS squelch? DSC enabled? Scan enabled? <td>0x01
-<tr>        <td>0x2     <td>ATIS enabled <td>0x00 = no, 0x01 = yes
+<tr>        <td>0x2     <td>ATIS enabled <td>0x00=no, 0x01=yes (see note below)
 <tr>        <td>0x3–0x6 <td>channel group name <td>0–4 chars, 0xff padded
 <tr class=c><td>0x7     <td> <td>0xff
 <tr>        <td>0x8–0xf <td>model string? <td>5–6 chars, 0xff padded
 </table>
 
-<p class=x>Does the “enable ATIS” flag do anything for the EXP group?
+<p>YCE15 uses the “ATIS enabled” field of the fourth channel group definition (memory location 0x00a2) to decide whether or not to display the ATIS setup (0x00=no, 0x01=yes).
 
 <h3 id=channel-flags>Marine Channel Flags</h3>
 <table class=eeprom>
