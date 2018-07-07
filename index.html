@@ -27,7 +27,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 
 <p id=githubspace>The <a href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;DivisionID=3&amp;ProdCatID=85&amp;ProdID=1791">HX870</a> is the successor to the Standard Horizon HX851 marine VHF radio. This page was inspired by a <a href=http://www.paul.sladen.org/toys/vertex/hx851e.html>collection of information about the HX851</a> by Paul Sladen. I originally created this page for my own use, then decided it might also be of use to others.
 
-<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was gathered by playing around some with HX870 and HX870E radios and the YCE15 software that goes with it. Several radio users contributed information to this page; <a href="http://www.marine-dsc.org/contact-us/">Norm Perron</a> and <a href="https://github.com/cr">Christiane Rütten</a> were particularly helpful.
+<p>I do not work for Standard Horizon / Yaesu, nor do I have first-hand “inside” knowledge about any of their products. The information on this page was gathered by playing around some with HX870 and HX870E radios and the YCE15 software that goes with it. Several radio users contributed information to this page; Norm Perron and <a href="https://github.com/cr">Christiane Rütten</a> were particularly helpful.
 
 <p><strong>Disclaimer:</strong> Modifying the memory image directly using a hex editor is likely not a supported function of the device or its accompanying software. As such, it might <strong>void your warranty</strong> or <strong>brick the radio</strong> or even put it into a state where it transmits or receives on frequencies forbidden by international <a href=https://www.itu.int/pub/R-REG-RR/e>Radio Regulations</a>, local regulations (<a href=https://www.fcc.gov/wireless/bureau-divisions/mobility-division/maritime-mobile-service>FCC</a> / <a href=https://www.bundesnetzagentur.de/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/SpezielleAnwendungen/Seefunk/Seefunk-node.html>BNetzA</a> / …) or local law. Using the radio in such a state might disrupt vital safety-of-life services. Many jurisdictions impose a <strong>fine or criminal penalty</strong> on it. You should not mess around with any of this stuff unless you know what you’re doing! And, to finally state the obvious: Whatever <em>you</em> do, <em>I</em> cannot be held responsible for it.
 
@@ -54,11 +54,11 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr>        <th>Address       <th>Data <th>Format
 <tr class=c><td>0x0000–0x0001 <td>magic number <td>0x0367 = 871
 <tr class=x><td>0x0002–0x0005 <td>DW inactive, WX inactive, …? <td>0x01000000
-<tr class=x><td>0x0006        <td> <td>[values seen: 0x00, 0x02]
+<tr class=x><td>0x0006        <td> <td>[values seen: 0x00, 0x01, 0x02]
 <tr class=x><td>0x0007        <td> <td>0x00
 <tr>        <td>0x0008        <td>selected channel group <td>
 <tr class=x><td>0x0009–0x000a <td> <td>0x0e02
-<tr class=x><td>0x000b        <td> <td>[values seen: 0x01, 0x02]
+<tr class=x><td>0x000b        <td> <td>[values seen: 0x00, 0x01, 0x02]
 <tr>        <td>0x000c        <td>volume setting <td>numeric (0=min, 15=max)
 <tr>        <td>0x000d        <td>squelch setting <td>numeric (0=open, 15=max)
 <tr class=x><td>0x000e        <td>distress alert status? <td>usually 0x00
@@ -67,7 +67,8 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr>        <td>0x0012–0x0013 <td>channel used before <kbd class=red>16/S</kbd> was pressed <td><a href=#channel-index>Channel Index</a>
 <tr class=x><td>0x0014        <td> <td>0xf0
 <tr class=x><td>0x0015        <td> <td>[values seen: 0x01, 0x04]
-<tr class=c><td>0x0016–0x001f <td> <td>0xff…
+<tr class=c><td>0x0016–0x001e <td> <td>0xff…
+<tr class=x><td>0x001f        <td> <td>[values seen: 0x00, 0xff]
 <tr>        <td>0x0020–0x006f <td>device setup <td><a href=#setup1>Setup 1</a>
 <tr>        <td>0x0070–0x00af <td>channel group names <td>4 * <a href=#channel-group-def>Channel Group Definition</a>
 <tr>        <td>0x00b0–0x00ff <td>DSC setup <td><a href=#setup2>Setup 2</a>
@@ -137,7 +138,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr class=c><td>0x0a80–0x0a9f <td> <td>0xff…
 <tr>        <td>0x0aa0–0x0adf <td>regional channels <td>12 * <a href=#channel-definition>Private Channel Definition</a>
 <tr>        <td>0x0b00–0x0b57 <td>expansion channels <td>20 * <a href=#channel-definition>Private Channel Definition</a>
-<tr>        <td>0x0ba0–0x0eff <td>channel names group 1 <td>96 * 16 * char
+<tr>        <td>0x0ba0–0x119f <td>channel names group 1 <td>96 * 16 * char
 <tr class=c><td>0x11a0–0x179f <td> <td>96 * 16 * 0xff
 <tr>        <td>0x17a0–0x1d9f <td>channel names group 2 <td>96 * 16 * char
 <tr class=c><td>0x1da0–0x239f <td> <td>96 * 16 * 0xff
@@ -217,19 +218,20 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr>        <td>0x0034        <td>multi watch <td>0x00=dual, 0x01=triple
 <tr class=x><td>0x0035        <td> <td>0x01
 <tr>        <td>0x0036        <td>scan type <td>0x00=memory, 0x01=priority
-<tr>        <td>0x0037        <td>scan resume time <td>
+<tr>        <td>0x0037        <td>scan resume time <td>numeric (1=min, 5=max)
 <tr>        <td>0x0038        <td>weather alert <td>0x00=off, 0x01=on
 <tr class=x><td>0x0039        <td> <td>0x00
 <tr>        <td>0x003a        <td>emergency LED <td>0x00=continuous, 0x01=SOS, 0x02=Blink1, 0x03=Blink2, 0x04=Blink3
 <tr>        <td>0x003b        <td>water hazard LED <td>0x00=off, 0x01=on, 0x02=power-on
-<tr>        <td>0x003c        <td>lamp <td>0x00=off, 0x01=3s, 0x02=5s, 0x03=10s, 0x04=20s, 0x05=30s, 0x06=continuous
+<tr>        <td>0x003c        <td>lamp <td>0x00=off, 0x01=3s, 0x02=5s, 0x03=10s, 0x04=continuous, 0x05=20s, 0x06=30s
 <tr>        <td>0x003d        <td>AF pitch CONT <td>0x00=normal, 0x01=high-low-cut, 0x02=high-low-boost, 0x03=low-boost, 0x04=high-boost
 <tr>        <td>0x003e        <td>battery save <td>0x00=off, 0x01=50%, 0x02=70%, 0x03=80%, 0x04=90%
 <tr class=c><td>0x003f        <td> <td>0xff
 <tr>        <td>0x0040        <td>VOX <td>0x00=off, 0x01=on
 <tr>        <td>0x0041        <td>VOX level <td>numeric (0=min, 4=max)
 <tr>        <td>0x0042        <td>VOX delay time <td>0x00=0.5s, 0x01=1.0s, 0x02=1.5s, 0x03=2.0s, 0x04=3.0s
-<tr>        <td>0x0043        <td>noise cancel Rx <td>
+<tr>        <td>0x0043        <td>noise cancel Rx <td>0x00=off, 0x01=on
+<tr>        <td>0x0044        <td>noise cancel Rx level <td>0x00=1, 0x01=2, 0x02=3, 0x03=4
 <tr>        <td>0x0045        <td>noise cancel Tx <td>0x00=off, 0x01=on
 <tr class=x><td>0x0046-0x049  <td> <td>0x00ffffff
 <tr>        <td>0x004a        <td>nav display range <td>0x00=auto, 0x01=2M, 0x02=5M, 0x03=10M, 0x04=25M
@@ -248,7 +250,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr>        <td>0x0058        <td><abbr title="satellite-based augmentation system, e. g. WAAS / EGNOS">SBAS</abbr> enabled <td>0x00=no, 0x01=yes
 <tr>        <td>0x0059        <td>map orientation <td>0x00=north-up, 0x01=course-up
 <tr>        <td>0x005a        <td>GPS output sentences <td>bitmask; see below
-<tr>        <td>0x005b        <td>GPS logger interval <td>
+<tr>        <td>0x005b        <td>GPS logger interval <td>0x00=5s, 0x01=15s, 0x02=30s, 0x03=1min, 0x04=5min
 <tr class=x><td>0x005c        <td> <td>0x00
 <tr class=c><td>0x005d-0x05f  <td> <td>0xffffff
 <tr>        <td>0x0060        <td>selected soft key page <td>numeric
@@ -308,14 +310,14 @@ Examples:
 <table class=eeprom>
 <tr>        <th>Address       <th>Data <th>Format
 <tr>        <td>0x00b0–0x00b4 <td>own DSC address (MMSI) <td>10 nibbles BCD (last nibble zero)
-<tr class=x><td>0x00b5        <td>own DSC address programmed <td>0x00=no, 0x01=once?, 0x02=twice?
+<tr class=x><td>0x00b5        <td>own DSC address programmed <td>0x00=no, 0x01=yes, 0x02=?
 <tr>        <td>0x00b6–0x00ba <td>own ATIS code <td>10 nibbles BCD (or 0xff… if not programmed)
 <tr>        <td>0x00bb        <td>own ATIS code programmed <td>0x00=no, 0x01=yes
 <tr class=x><td>0x00bc–0x00c3 <td> <td>0x011f6f1f2f2f2f5c
 <tr class=x><td>0x00c4        <td> <td>[values seen: 0x78, 0xf8]
 <tr>        <td>0x00c5        <td>DSC beep settings <td>bitmask; see below
 <tr class=x><td>0x00c6        <td> <td>[values seen: 0x03, 0x04]
-<tr>        <td>0x00c7        <td>IndividualRing <td>0x00=5s, 0x01=10s, 0x02=15s, 0x03=20s, 0x04=120s
+<tr>        <td>0x00c7        <td>individual ring <td>0x00=5s, 0x01=10s, 0x02=15s, 0x03=20s, 0x04=120s
 <tr>        <td>0x00c8        <td>no act timer <td>0x00=1min, 0x01=3min, 0x02=5min, 0x03=10min, 0x04=15min
 <tr>        <td>0x00c9        <td>CH switch timer <td>0x00=off, 0x01=10s, 0x02=30s, 0x03=60s, 0x04=120s
 <tr>        <td>0x00ca        <td>POS fix wait <td>0x00=15s, 0x01=30s, 0x02=60s, 0x03=90s, 0x04=120s
