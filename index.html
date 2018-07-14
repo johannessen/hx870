@@ -127,11 +127,17 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr class=c><td>0x02dc–0x02df <td> <td>0xff…
 <tr class=x><td>0x02e0–0x02f3 <td>activation per channel group for EXP <td>only 3 least significant bits, one EXP channel per byte
 <tr class=c><td>0x02f4–0x02ff <td> <td>0xff…
-<tr class=x><td>0x0300–0x037f <td>DSC individual call history? <td>DSC address + 1 unknown byte + <br><a href=#channel-index>Channel Index</a> + 8 byte padding ?
-<tr class=x><td>0x0380–0x04ff <td>DSC group call history? <td>DSC address + 1 unknown byte + <br><a href=#channel-index>Channel Index</a> + 8 byte padding ?
-<tr class=x><td>0x0400–0x04ff <td>more call history? <td>DSC address + 1 unknown byte + 10 byte padding ?
-<tr class=x><td>0x0480–0x04ff <td>more call history? <td>DSC address + 1 unknown byte + 10 byte padding ?
-<tr class=x><td>0x0500–0x05ff <td>more call history? <td>DSC address + 1 unknown byte + 2 byte padding ?
+<tr>        <td>0x0300–0x036f <td>DSC individual call history <td>7 * <a href=#call-history-entry>Call History Entry</a> (padded to 16 bytes)
+<tr class=c><td>0x0370–0x037f <td> <td>0xff…
+<tr>        <td>0x0380–0x03ef <td>DSC group call history <td>7 * <a href=#call-history-entry>Call History Entry</a> (padded to 16 bytes)
+<tr class=c><td>0x03f0–0x03ff <td> <td>0xff…
+<tr>        <td>0x0400–0x046f <td>DSC position request call history <td>7 * <a href=#call-history-entry>Call History Entry</a> (padded to 16 bytes)
+<tr class=c><td>0x0470–0x047f <td> <td>0xff…
+<tr>        <td>0x0480–0x04ef <td>DSC position report call history <td>7 * <a href=#call-history-entry>Call History Entry</a> (padded to 16 bytes)
+<tr class=c><td>0x04f0–0x04ff <td> <td>0xff…
+<tr class=x><td>0x0500–0x057f <td>DSC polling/test call history <td><a href=#call-history-entry>Call History Entry</a> ?
+<tr class=x><td>0x0580–0x05a4 <td>auto polling <td>7 DSC addresses (0xff inserted every 3 addr.) ?
+<tr class=x><td>0x05a5–0x05ff <td> <td>0xff…
 <tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
@@ -389,6 +395,20 @@ Default value:
 </table>
 
 <p>YCE15 uses the “ATIS enabled” field of the fourth channel group definition (memory location 0x00a2) to decide whether or not to display the ATIS setup (0x00=no, 0x01=yes).
+
+<h3 id=call-history-entry>Call History Entry</h3>
+<table class=eeprom>
+<tr>        <th>Offset  <th>Data <th>Format
+<tr>        <td>0x0–0x4 <td>DSC address (MMSI) <td>10 nibbles BCD (last nibble zero)
+<tr class=x><td>0x5     <td>call type / priority ? <td>
+<tr>        <td>0x6–0x7 <td>channel used <br>(individual/group call only) <td><a href=#channel-index>Channel Index</a> (or 0xffff)
+</table>
+
+<p>The entries are listed in descending order of age (oldest first).
+
+<p class=x>The presumed “call type” or “priority” field is usually 0x03 for individual/group calls and 0x02 for position request/report calls. Polling and test call histories appear to either share the same memory area; it’s not yet clear whether they are differentiated by the “call type”/“priority” field, or whether there are columns in this area (left column polling, right column test).
+
+<p class=x>It is not known why the channel is recorded in the history in addition to the log.
 
 <h3 id=channel-flags>Marine Channel Flags</h3>
 <table class=eeprom>
