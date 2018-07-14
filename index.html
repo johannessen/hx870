@@ -319,7 +319,14 @@ Examples:
 <tr class=x><td>0x00b5        <td>own DSC address programmed <td>0x00=no, 0x01=yes, 0x02=?
 <tr>        <td>0x00b6–0x00ba <td>own ATIS code <td>10 nibbles BCD (or 0xff… if not programmed)
 <tr>        <td>0x00bb        <td>own ATIS code programmed <td>0x00=no, 0x01=yes
-<tr class=x><td>0x00bc–0x00c3 <td> <td>0x011f6f1f2f2f2f5c
+<tr class=x><td>0x00bc        <td> <td>0x01
+<tr>        <td>0x00bd        <td>DSC Individual call categories <td>0x1f (bitmask; see below)
+<tr>        <td>0x00be        <td>DSC All Ships call categories <td>0x6f (bitmask; see below)
+<tr>        <td>0x00bf        <td>DSC Group call categories <td>0x1f (bitmask; see below)
+<tr>        <td>0x00c0        <td>DSC Position Request call categories <td>0x2f (bitmask; see below)
+<tr>        <td>0x00c1        <td>DSC Position Report call categories <td>0x2f (bitmask; see below)
+<tr>        <td>0x00c2        <td>DSC Test call categories <td>0x2f (bitmask; see below)
+<tr class=x><td>0x00c3        <td> <td>0x5c
 <tr class=x><td>0x00c4        <td> <td>[values seen: 0x78, 0xf8]
 <tr>        <td>0x00c5        <td>DSC beep settings <td>bitmask; see below
 <tr class=x><td>0x00c6        <td> <td>[values seen: 0x03, 0x04]
@@ -342,6 +349,17 @@ Examples:
 <tr class=x><td>0x00f5–0x00f6 <td> <td>[values seen: 0x4630, 0x8cff]
 <tr class=c><td>0x00f7–0x00ff <td> <td>0xff…
 </table>
+
+<p><strong>DSC Call Categories</strong>
+<pre>
+0x80 = 1xxxxxxx = Distress
+0x40 = x1xxxxxx = Urgency
+0x20 = xx1xxxxx = Safety
+0x10 = xxx1xxxx = Routine
+0x0f = xxxx1111 - padding
+</pre>
+
+<p>Note: The DSC call categories (priorities) are prescribed by <a href=https://www.itu.int/rec/R-REC-M.493>Rec. ITU-R M.493</a>. The HX870 by default correctly implements the category options for class D radios, except that the HX870 additionally allows position request and polling calls.
 
 <p><strong>DSC Beep Settings</strong>
 <pre>
