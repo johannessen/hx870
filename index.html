@@ -53,7 +53,9 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <table class=eeprom>
 <tr>        <th>Address       <th>Data <th>Format
 <tr class=c><td>0x0000–0x0001 <td>magic number <td>0x0367 = 871
-<tr class=x><td>0x0002–0x0005 <td>DW inactive, WX inactive, …? <td>0x01000000
+<tr class=x><td>0x0002–0x0003 <td> <td>0x0100
+<tr>        <td>0x0004        <td>multi watch / scan <td>0x00=off, 0x01=multi, 0x02=scan
+<tr class=x><td>0x0005        <td> <td>0x00
 <tr class=x><td>0x0006        <td> <td>[values seen: 0x00, 0x01, 0x02]
 <tr class=x><td>0x0007        <td> <td>0x00
 <tr>        <td>0x0008        <td>selected channel group <td>
@@ -109,7 +111,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr class=c><td>0x01f9–0x01fb <td> <td>[values seen: 0x00…, 0xff…]
 <tr class=c><td>0x01fc–0x01ff <td> <td>0xff…
 <tr>        <td>0x0200–0x0213 <td>preset list group 1 <td>10 * <a href=#channel-index>Channel Index</a>
-<tr class=x><td>0x0214        <td> <td>[values seen: 0x07, 0x09, 0xff]
+<tr class=x><td>0x0214        <td> <td>[values seen: 0x04, 0x07, 0x09, 0xff]
 <tr class=c><td>0x0215–0x021f <td> <td>0xff…
 <tr>        <td>0x0220–0x023f <td>preset list group 2 <td>10 * <a href=#channel-index>Channel Index</a>
 <tr class=x><td>0x0234        <td> <td>0xff
@@ -137,7 +139,9 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr class=c><td>0x04f0–0x04ff <td> <td>0xff…
 <tr class=x><td>0x0500–0x057f <td>DSC polling/test call history <td><a href=#call-history-entry>Call History Entry</a> ?
 <tr class=x><td>0x0580–0x05a4 <td>auto polling <td>7 DSC addresses (0xff inserted every 3 addr.) ?
-<tr class=x><td>0x05a5–0x05ff <td> <td>0xff…
+<tr class=c><td>0x05a5–0x05df <td> <td>0xff…
+<tr class=x><td>0x05e0–0x05e2 <td> <td>[values seen: 0x050402, 0x01ffff, 0xffffff]
+<tr class=c><td>0x05e3–0x05ff <td> <td>0xff…
 <tr>        <td>0x0600–0x077f <td>channel flags group 1 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0780–0x08ff <td>channel flags group 2 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
 <tr>        <td>0x0900–0x0a7f <td>channel flags group 3 <td>96 * <a href=#channel-flags>Marine Channel Flags</a>
@@ -208,6 +212,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <p id=preset>The status byte can be used in the preset lists to signal whether that preset is enabled. For other uses of the channel index, it is usually zero.
 
 <p class=x>Sometimes the status byte duplicates the channel byte's value rather than being zero. Different values have also been observed. The significance of this is unclear.
+<!-- In some cases, the radio itself codes e. g. EXP channel #3 as 0x1003. It has not been confirmed whether this is in fact the “correct” code, but it does seem to clash with some of the other values that have been observed here. For example, one brand-new HX870E had the values doubled for priority/sub channels in the inactive channel groups (e. g. 0x1010 for channel 16), but status zero in the active channel group (0x0010). The radio does support more than 15 EXP channels, so 0x1010 would then be ambiguous, which doesn't make sense. FWIW, the radio seems to always accept channel indices if coded as explained earlier in this section. -->
 
 <p>There is some sort of bug in the YCE15 software version 2.0.0.4 that can result in unusable Presets. For example, when setting an “EXP” channel as a preset (possibly also when simply setting a preset to “none”), byte values in the range of 0x81–0xff are set. This results in channels with unusual numbers like “00” or “43” in the radio that give off funny noises when they’re selected.
 
@@ -241,7 +246,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr>        <td>0x0045        <td>noise cancel Tx <td>0x00=off, 0x01=on
 <tr class=x><td>0x0046-0x049  <td> <td>0x00ffffff
 <tr>        <td>0x004a        <td>nav display range <td>0x00=auto, 0x01=2M, 0x02=5M, 0x03=10M, 0x04=25M
-<tr class=x><td>0x004b        <td> <td>0xff
+<tr class=x><td>0x004b        <td> <td>[values seen: 0x01, 0xff]
 <tr>        <td>0x004c        <td>nav arrival range <td>0x00=0.05M, 0x01=0.1M, 0x02=0.2M, 0x03=0.5M, 0x04=1.0M
 <tr>        <td>0x004d        <td>nav routing operation <td>0x00=auto, 0x01=manual
 <tr class=c><td>0x004e-0x04f  <td> <td>0xffff
@@ -336,15 +341,15 @@ Examples:
 <tr>        <td>0x00ca        <td>POS fix wait <td>0x00=15s, 0x01=30s, 0x02=60s, 0x03=90s, 0x04=120s
 <tr class=x><td>0x00cb–0x00cf <td> <td>0xff01ff0000
 <tr class=c><td>0x00d0–0x00df <td> <td>0xff…
-<tr class=x><td>0x00e0        <td> <td>0x00
-<tr>        <td>0x00e1        <td>auto POS polling <td>0x00=request, 0x01=report
+<tr>        <td>0x00e0        <td>auto POS polling activation <td>0x00=stop, 0x01=start
+<tr>        <td>0x00e1        <td>auto POS polling type <td>0x00=request, 0x01=report
 <tr>        <td>0x00e2        <td>auto POS time <td>0x00=30s, 0x01=1min, 0x02=2min, 0x03=3min, 0x04=5min
 <tr class=x><td>0x00e3–0x00e4 <td> <td>0x0200
 <tr class=x><td>0x00e5–0x00e6 <td> <td>[values seen: 0x4630, 0x8cff]
 <tr class=c><td>0x00e7–0x00ef <td> <td>0xff…
 <tr class=x><td>0x00f0–0x00f1 <td> <td>0x0002
 <tr>        <td>0x00f2        <td>GM interval <td>0x00=1min, 0x01=3min, 0x02=5min, 0x03=10min, 0x04=15min
-<tr class=x><td>0x00f3        <td> <td>[values seen: 0x03, 0xff]
+<tr class=x><td>0x00f3        <td> <td>[values seen: 0x01, 0x03, 0xff]
 <tr class=x><td>0x00f4        <td> <td>0x00
 <tr class=x><td>0x00f5–0x00f6 <td> <td>[values seen: 0x4630, 0x8cff]
 <tr class=c><td>0x00f7–0x00ff <td> <td>0xff…
@@ -405,7 +410,7 @@ Default value:
 <table class=eeprom>
 <tr>        <th>Offset  <th>Data <th>Format
 <tr>        <td>0x0     <td>channel group enabled <td>0x00=no, 0x01=yes
-<tr class=x><td>0x1     <td>ATIS squelch? DSC enabled? Scan enabled? <td>0x01
+<tr>        <td>0x1     <td>DSC enabled <td>0x00=no, 0x01=yes
 <tr>        <td>0x2     <td>ATIS enabled <td>0x00=no, 0x01=yes (see note below)
 <tr>        <td>0x3–0x6 <td>channel group name <td>0–4 chars, 0xff padded
 <tr class=c><td>0x7     <td> <td>0xff
