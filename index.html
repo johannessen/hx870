@@ -348,7 +348,7 @@ Examples:
 <tr>        <td>0x00c1        <td>DSC Position Report call categories <td>0x2f (bitmask; see below)
 <tr>        <td>0x00c2        <td>DSC Test call categories <td>0x2f (bitmask; see below)
 <tr class=x><td>0x00c3        <td> <td>0x5c
-<tr class=x><td>0x00c4        <td> <td>[values seen: 0x78, 0xf8]
+<tr class=x><td>0x00c4        <td>DSC Individual Call Reply <td>bitmask; see below
 <tr>        <td>0x00c5        <td>DSC beep settings <td>bitmask; see below
 <tr class=x><td>0x00c6        <td> <td>[values seen: 0x03, 0x04]
 <tr>        <td>0x00c7        <td>individual ring <td>0x00=5s, 0x01=10s, 0x02=15s, 0x03=20s, 0x04=120s
@@ -381,6 +381,19 @@ Examples:
 </pre>
 
 <p>Note: The DSC call categories (priorities) are prescribed by <a href=https://www.itu.int/rec/R-REC-M.493>Rec. ITU-R M.493</a>. The HX870 by default correctly implements the category options for class D radios, except that the HX870 additionally allows position request and polling calls.
+
+<p><strong>DSC Individual Call Reply</strong>
+<pre>
+0x80 = 1xxxxxxx = automatic reply
+0x40 = x1xxxxxx = reply 'able'
+other bits: unknown
+
+Values seen:
+0x38 = 00111000 = automatic 'unable' reply disabled
+0x78 = 01111000 = automatic 'able' reply disabled
+0xb8 = 10111000 = automatic 'unable' reply enabled
+0xf8 = 11111000 = automatic 'able' reply enabled
+</pre>
 
 <p><strong>DSC Beep Settings</strong>
 <pre>
