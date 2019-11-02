@@ -294,7 +294,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 0x80 = 1xxxxxxx = local time (0 = UTC)
 0x40 = x1xxxxxx = 24 hour clock (0 = AM/PM)
 0x20 = xx1xxxxx = time offset has positive sign (0 = negative sign)
-0x08 = xxx11111 = time offset in half hours
+0x1f = xxx11111 = time offset in half hours
 
 Examples:
 0x60 = 01100000 = UTC
@@ -377,7 +377,7 @@ Examples:
 0x40 = x1xxxxxx = Urgency
 0x20 = xx1xxxxx = Safety
 0x10 = xxx1xxxx = Routine
-0x0f = xxxx1111 - padding
+0x0f = xxxx1111 - Hi/Low Tx power on channel 70 by category?
 </pre>
 
 <p>Note: The DSC call categories (priorities) are prescribed by <a href=https://www.itu.int/rec/R-REC-M.493>Rec. ITU-R M.493</a>. The HX870 by default correctly implements the category options for class D radios, except that the HX870 additionally allows position request and polling calls.
@@ -548,7 +548,7 @@ CAN:
 0x08 = xxxx1xxx = low power
 0x04 = xxxxx1xx - ?
 0x02 = xxxxxx1x - ?
-0x01 = xxxxxxx1 = user power up?
+0x01 = xxxxxxx1 = user power up
 
 Frequent combinations:
 0x00 = xxxx0000 = standard
@@ -568,7 +568,7 @@ Illegal combinations:
 <table class=eeprom>
 <tr>        <th>Offset    <th>Data <th>Format
 <tr>        <td>0x00–0x04 <td>GMID <td>10 nibbles BCD (last nibble zero)
-<tr>        <td>0x04–0x0f <td>GM name <td>
+<tr>        <td>0x05–0x0f <td>GM name <td>
 <tr>        <td>0x10–0x3f <td>member addresses <td>9 * 10 nibbles BCD (last nibble zero) <br>after every third address, a single 0xff byte is inserted
 </table>
 
