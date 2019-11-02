@@ -261,7 +261,7 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr>        <td>0x0045        <td>noise cancel Tx <td>0x00=off, 0x01=on
 <tr class=x><td>0x0046-0x049  <td> <td>0x00ffffff
 <tr>        <td>0x004a        <td>nav display range <td>0x00=auto, 0x01=2M, 0x02=5M, 0x03=10M, 0x04=25M
-<tr class=x><td>0x004b        <td>nav target waypoint <td>numeric (one-based index)
+<tr>        <td>0x004b        <td>nav target waypoint <td>numeric (one-based index)
 <tr>        <td>0x004c        <td>nav arrival range <td>0x00=0.05M, 0x01=0.1M, 0x02=0.2M, 0x03=0.5M, 0x04=1.0M
 <tr>        <td>0x004d        <td>nav routing operation <td>0x00=auto, 0x01=manual
 <tr>        <td>0x004e        <td>nav target route <td>numeric (one-based index)
@@ -575,8 +575,8 @@ Illegal combinations:
 <h3 id=wpt-def>Waypoint Definition</h3>
 <table class=eeprom>
 <tr>        <th>Offset    <th>Data <th>Format
-<tr>        <td>0x00–0x05 <td>MMSI from pos report <td>10 nibbles BCD (last nibble zero)
-<tr>        <td>0x06–0x0f <td>waypoint position <td><a href=#position>Internal Position Format</a>
+<tr>        <td>0x00–0x04 <td>MMSI from pos report <td>10 nibbles BCD (last nibble zero)
+<tr>        <td>0x05–0x0f <td>waypoint position <td><a href=#position>Internal Position Format</a>
 <tr>        <td>0x10–0x1e <td>waypoint name <td>15 * char
 <tr>        <td>0x1f      <td>waypoint id <td>numeric (one-based)
 </table>
