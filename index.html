@@ -78,7 +78,8 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 <tr class=c><td>0x0100–0x0107 <td>flash ID <td><code>AM057N2</code>
 <tr class=c><td>0x0108–0x010e <td> <td>0xff…
 <tr>        <td>0x010f        <td>region selection (group 3 mode) <td><a href=#regions>Region Selection</a>
-<tr class=x><td>0x0110–0x011f <td>BCD time stamp of something plus some other data <td>
+<tr>        <td>0x0110–0x0114 <td>radio last turned off timestamp <td>10 nibbles BCD (yymmddhhmm), UTC
+<tr>        <td>0x0115–0x011f <td>radio last turned off position <td><a href=#position>Internal Position Format</a>
 <tr>        <td>0x0120–0x012b <td>channel enabled group 1 <td>bitmask
 <tr class=c><td>0x012c–0x012f <td> <td>0x00000000
 <tr class=c><td>0x0130–0x013f <td> <td>[values seen: 0x00…, 0xff…]
