@@ -543,6 +543,8 @@ CAN:
 0x827f = 10000010 01111111 : "B" channels ................ Tx forbidden, Rx frq shift
 -->
 
+<p>DSC ship/ship channels (also known as “ship to ship” or “intership” channels) are those channels that the radio offers to choose from e. g. when initiating a DSC individual call. Any channel can be added or removed from that list simply by setting or clearing its “ship/ship” flag in the bitmask described above. An arbitrary channel can also be chosen for a DSC call after pressing the “manual” soft key, but customizing the list of ship/ship channels may be useful to streamline routine operation.
+
 <p>Firmware 2.03 appears to have a bug in the “GRMN” (RAINWAT) channel group: Channel 20 doesn't have the “high power allowed” bit set although high power <em>is</em> allowed. This is easily fixable by modifying memory location 0x0955 in the memory image from 0x90 to 0xb0. (Furthermore, channels 17 and 69 are not intership channels according to RAINWAT rules, but arguably 87 is.)
 
 <p>Firmware 2.03 also appears to set the “suffix A” bit for channel 88, but not for 87 for the USA channel group. Given that both channels were redefined at the same time for the introduction of AIS, it’s clear that either both or none should have the “A”. According to the manual, both should have the suffix, but according to <a href="https://www.navcen.uscg.gov/?pageName=mtvhf">the Coast Guard</a>, neither should have it.
