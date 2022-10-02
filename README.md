@@ -11,4 +11,4 @@ If you find an error or can help fill in the gaps, please make a new
 [pull request](https://github.com/johannessen/hx870/pulls).
 
 Alternatively, you can share your knowledge on the mailing list for the HX870:
-<https://groups.io/g/hx870>
+<https://groups.io/g/hx870-hx890>
