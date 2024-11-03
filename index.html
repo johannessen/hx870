@@ -42,6 +42,20 @@ tr.c td, .c.example { background-color: #dfd; color: #898; } /* probable constan
 
 <p>32kB EEPROM, stored by Standard Horizon’s YCE15 software as a *.dat file
 
+<p>You can read and write the radio’s EEPROM using the amazing <a href="https://mbof.github.io/hx/">SHsync</a> Web application. <span id=webserial>Unfortunately, it requires the Web Serial API, which is currently only natively available on Chrome and Chromium-based browsers.</span>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+	var webserialSpan = document.getElementById("webserial");
+	if ("serial" in navigator) {
+		webserialSpan.innerHTML = "It requires the Web Serial API, which is supported by your current browser (though not by all others).";
+	}
+	else {
+		webserialSpan.innerHTML = "Unfortunately, it requires the Web Serial API, which is not supported on your current browser. It’s known to work in Chrome and Chromium-based browsers. (Third-party extensions that add support to other browsers might exist.)";
+	}
+});
+</script>
+
 <p>If you own <a href="https://www.sweetscape.com/010editor/">010 Editor</a>, you may find the <a href="https://github.com/cr/hx870/blob/master/hx870dat.bt">binary template</a> included with the HX870 Python tools most useful. The <a href="https://github.com/cr/hx870">Python tools</a> also allow reading and writing the radio’s EEPROM on operating systems that can’t run YCE15, such as macOS.
 
 <p>The significance of memory locations marked with a <span class="x example">yellow background</span> has not been discovered.
